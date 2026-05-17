@@ -1,0 +1,15 @@
+{
+  "id": 2,
+  "name": "Competitor Price Drop + Inventory Surplus",
+  "description": "Market pressure plus overstock creates margin and capacity crisis",
+  "input_signals": [
+    {
+      "type": "text",
+      "content": "Market intelligence report: Competitor TechMart reduced prices across electronics category by 20% starting Monday. Social media tracking shows 340% increase in TechMart brand mentions this week. Three key SKUs now priced 25% below our current retail."
+    },
+    {
+      "type": "text",
+      "content": "Warehouse operations report: Karachi warehouse at 94% capacity. Electronics inventory represents 60 days of stock versus our 30-day target. Perishable tech accessories category at risk of expiry within 45 days. Storage overage fees kicking in next month."
+    }
+  ]
+}

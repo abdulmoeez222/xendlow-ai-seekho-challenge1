@@ -1,0 +1,19 @@
+{
+  "id": 3,
+  "name": "Rupee Devaluation + Import Pipeline Exposure",
+  "description": "Currency shock hits dollar-denominated inventory pipeline",
+  "input_signals": [
+    {
+      "type": "text",
+      "content": "SBP announcement: Pakistani Rupee depreciates 8.3% against USD this month. Current interbank rate PKR 285 per USD, highest level in 18 months. Further depreciation expected per analyst consensus."
+    },
+    {
+      "type": "text",
+      "content": "Finance department report: 70% of our inventory is sourced as dollar-denominated imports. Current import pipeline: USD 2.3 million in transit. Landed cost increase estimated at PKR 52 million based on rate change."
+    },
+    {
+      "type": "text",
+      "content": "Product margin analysis Q3: Gross margins on imported electronics currently at 18%. Post-devaluation projected margin: 9.2%. Three product categories projected to hit break-even or loss: Air Conditioners, LED TVs, Washing Machines."
+    }
+  ]
+}
