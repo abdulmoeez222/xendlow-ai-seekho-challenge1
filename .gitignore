@@ -1,109 +1,24 @@
-# Miscellaneous
-*.class
-*.log
-*.pyc
-*.swp
-.DS_Store
-.atom/
-.buildlog/
-.history
-.svn/
-migrate.log
+# Backend
+backend/.env
+backend/__pycache__/
+backend/*.pyc
+backend/.venv/
 
-# IntelliJ related
-*.iml
-*.ipr
-*.iws
-.idea/
+# Web
+web/.env
+web/node_modules/
+web/dist/
 
-# The .vscode/ directory contains editor-specific configurations.
-# Visual Studio Code
-.vscode/
+# Mobile
+mobile/.env
+mobile/build/
+mobile/.dart_tool/
+mobile/.flutter-plugins
+mobile/.flutter-plugins-dependencies
+mobile/android/.gradle/
+mobile/android/local.properties
+mobile/*.g.dart
 
-# Flutter/Dart/Pub related
-**/doc/api/
-**/ios/Flutter/.datasource
-**/ios/Flutter/ephemeral/
-**/ios/Flutter/GeneratedPluginRegistrant.h
-**/ios/Flutter/GeneratedPluginRegistrant.m
-**/io.flutter.plugins.shared_shared_preferences/
-.dart_tool/
-.flutter-plugins
-.flutter-plugins-dependencies
-.packages
-.pub-cache/
-.pub/
-/build/
-
-# Android related
-**/android/key.properties
-**/android/app/local.properties
-**/android/app/generated_sig.keystore
-**/android/app/google-services.json
-
-# iOS/macOS related
-**/ios/Flutter/App.framework
-**/ios/Flutter/Flutter.framework
-**/ios/Flutter/Flutter.podspec
-**/ios/Flutter/GeneratedPluginRegistrant.h
-**/ios/Flutter/GeneratedPluginRegistrant.m
-**/ios/Flutter/generated_sig.keystore
-**/ios/Flutter/ephemeral/
-**/ios/Flutter/App.framework
-**/ios/Flutter/Flutter.framework
-**/ios/Flutter/Flutter.podspec
-**/ios/Flutter/GeneratedPluginRegistrant.h
-**/ios/Flutter/GeneratedPluginRegistrant.m
-**/ios/Flutter/generated_sig.keystore
-**/ios/Flutter/ephemeral/
-**/ios/packages/
-**/ios/Pods/
-**/ios/.symlinks/
-**/ios/Flutter/app.flx
-**/ios/Flutter/app.zip
-**/ios/Flutter/flutter_assets/
-**/ios/Flutter/flutter_play_store.config
-**/ios/Flutter/flutter_assets.d
-**/ios/Flutter/App.framework.dSym
-**/ios/Flutter/Flutter.framework.dSym
-**/ios/Flutter/GeneratedPluginRegistrant.h.dSym
-**/ios/Flutter/GeneratedPluginRegistrant.m.dSym
-**/ios/Flutter/generated_sig.keystore.dSym
-**/ios/Flutter/ephemeral/.dSym
-**/ios/Flutter/App.framework.dSym
-**/ios/Flutter/Flutter.framework.dSym
-**/ios/Flutter/GeneratedPluginRegistrant.h.dSym
-**/ios/Flutter/GeneratedPluginRegistrant.m.dSym
-**/ios/Flutter/generated_sig.keystore.dSym
-**/ios/Flutter/ephemeral/.dSym
-**/ios/Flutter/App.framework.dSym/
-**/ios/Flutter/Flutter.framework.dSym/
-**/ios/Flutter/GeneratedPluginRegistrant.h.dSym/
-**/ios/Flutter/GeneratedPluginRegistrant.m.dSym/
-**/ios/Flutter/generated_sig.keystore.dSym/
-**/ios/Flutter/ephemeral/.dSym/
-**/ios/Flutter/App.framework.dSym/
-**/ios/Flutter/Flutter.framework.dSym/
-**/ios/Flutter/GeneratedPluginRegistrant.h.dSym/
-**/ios/Flutter/GeneratedPluginRegistrant.m.dSym/
-**/ios/Flutter/generated_sig.keystore.dSym/
-**/ios/Flutter/ephemeral/.dSym/
-
-# Windows related
-**/windows/flutter/ephemeral/
-**/windows/flutter/GeneratedPluginRegistrant.cc
-**/windows/flutter/GeneratedPluginRegistrant.h
-/windows/CMakeLists.txt.user
-
-# macOS related
-**/macos/Flutter/ephemeral/
-**/macos/Flutter/GeneratedPluginRegistrant.swift
-
-# Linux related
-**/linux/flutter/ephemeral/
-**/linux/flutter/GeneratedPluginRegistrant.cc
-**/linux/flutter/GeneratedPluginRegistrant.h
-
-# Hackathon raw prompts or files to ignore
+# Prompts and rules
 MOEEZ_Antigravity_Prompt.md
-InsightEngine_SRS.pdf
+AGENT_RULES.md
