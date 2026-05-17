@@ -3,14 +3,14 @@ import { usePipelineStore } from '../store/pipelineStore';
 import { usePipeline } from '../hooks/usePipeline';
 import { useRealtime } from '../hooks/useRealtime';
 
-import { InputPanel } from './InputPanel/InputPanel';
-import { PipelineTrace } from './Pipeline/PipelineTrace';
-import { InsightCard } from './Cards/InsightCard';
-import { ActionPlanCard } from './Cards/ActionPlanCard';
-import { ImpactCard } from './Cards/ImpactCard';
-import { BeforeAfterPanel } from './BeforeAfter/BeforeAfterPanel';
-import { TracePanel } from './AgentTrace/TracePanel';
-import { Skeleton } from './shared/Skeleton';
+import { InputPanel } from '../components/InputPanel/InputPanel';
+import { PipelineTrace } from '../components/Pipeline/PipelineTrace';
+import { InsightCard } from '../components/Cards/InsightCard';
+import { ActionPlanCard } from '../components/Cards/ActionPlanCard';
+import { ImpactCard } from '../components/Cards/ImpactCard';
+import { BeforeAfterPanel } from '../components/BeforeAfter/BeforeAfterPanel';
+import { TracePanel } from '../components/AgentTrace/TracePanel';
+import { Skeleton } from '../components/shared/Skeleton';
 
 export function Dashboard() {
   const { runScenario, runCustom } = usePipeline();

@@ -5,8 +5,8 @@ import { Dashboard } from './Dashboard';
 import { usePipelineStore } from '../store/pipelineStore';
 
 // Mock components that we've already tested to keep this test clean
-vi.mock('./InputPanel/InputPanel', () => ({ InputPanel: () => <div data-testid="input-panel" /> }));
-vi.mock('./Pipeline/PipelineTrace', () => ({
+vi.mock('../components/InputPanel/InputPanel', () => ({ InputPanel: () => <div data-testid="input-panel" /> }));
+vi.mock('../components/Pipeline/PipelineTrace', () => ({
   PipelineTrace: ({ renderStepContent }) => (
     <div data-testid="pipeline-trace">
       {/* We can manually call renderStepContent for testing */}
@@ -15,12 +15,12 @@ vi.mock('./Pipeline/PipelineTrace', () => ({
     </div>
   )
 }));
-vi.mock('./AgentTrace/TracePanel', () => ({ TracePanel: () => <div data-testid="trace-panel" /> }));
-vi.mock('./Cards/InsightCard', () => ({ InsightCard: () => <div data-testid="insight-card" /> }));
-vi.mock('./Cards/ActionPlanCard', () => ({ ActionPlanCard: () => <div data-testid="action-plan-card" /> }));
-vi.mock('./Cards/ImpactCard', () => ({ ImpactCard: () => <div data-testid="impact-card" /> }));
-vi.mock('./BeforeAfter/BeforeAfterPanel', () => ({ BeforeAfterPanel: () => <div data-testid="before-after-panel" /> }));
-vi.mock('./shared/Skeleton', () => ({ Skeleton: () => <div data-testid="skeleton" /> }));
+vi.mock('../components/AgentTrace/TracePanel', () => ({ TracePanel: () => <div data-testid="trace-panel" /> }));
+vi.mock('../components/Cards/InsightCard', () => ({ InsightCard: () => <div data-testid="insight-card" /> }));
+vi.mock('../components/Cards/ActionPlanCard', () => ({ ActionPlanCard: () => <div data-testid="action-plan-card" /> }));
+vi.mock('../components/Cards/ImpactCard', () => ({ ImpactCard: () => <div data-testid="impact-card" /> }));
+vi.mock('../components/BeforeAfter/BeforeAfterPanel', () => ({ BeforeAfterPanel: () => <div data-testid="before-after-panel" /> }));
+vi.mock('../components/shared/Skeleton', () => ({ Skeleton: () => <div data-testid="skeleton" /> }));
 vi.mock('../hooks/useRealtime', () => ({ useRealtime: vi.fn() }));
 vi.mock('../hooks/usePipeline', () => ({
   usePipeline: () => ({ runScenario: vi.fn(), runCustom: vi.fn() })
