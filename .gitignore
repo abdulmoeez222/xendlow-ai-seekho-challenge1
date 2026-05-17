@@ -1,24 +1,50 @@
-# Backend
-backend/.env
-backend/__pycache__/
-backend/*.pyc
-backend/.venv/
+# Dependencies
+node_modules/
 
-# Web
-web/.env
-web/node_modules/
-web/dist/
+# Build output
+dist/
+build/
 
-# Mobile
-mobile/.env
-mobile/build/
+# Environment variables
+.env
+.env.local
+.env.production
+.env.development
+
+# Hackathon private files
+OMER_Antigravity_Prompt.md
+.antigravity_rules.md
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor files
+.vscode/
+.idea/
+
+# Logs
+*.log
+npm-debug.log*
+
+# Testing coverage
+coverage/
+
+# Vercel
+.vercel
+
+# Vite cache
+.vite/
+
+# Flutter
 mobile/.dart_tool/
+mobile/build/
 mobile/.flutter-plugins
 mobile/.flutter-plugins-dependencies
-mobile/android/.gradle/
-mobile/android/local.properties
-mobile/*.g.dart
 
-# Prompts and rules
-MOEEZ_Antigravity_Prompt.md
-AGENT_RULES.md
+# Python
+backend/__pycache__/
+backend/*.pyc
+backend/venv/
+backend/.venv/
