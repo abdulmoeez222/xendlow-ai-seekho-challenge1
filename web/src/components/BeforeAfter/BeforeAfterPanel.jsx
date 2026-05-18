@@ -6,8 +6,13 @@ import { PricingDiff } from './PricingDiff';
 import { NotificationPreview } from './NotificationPreview';
 
 export function BeforeAfterPanel() {
-  const stateBefore = usePipelineStore(state => state.stateBefore);
+  const initialBefore = usePipelineStore(state => state.stateBefore);
+  const executionLog = usePipelineStore(state => state.executionLog);
+  const stateBefore = executionLog?.before_snapshot || initialBefore;
   
+  const stateAfter = usePipelineStore(state => state.stateAfter);
+  const isRunning = usePipelineStore(state => state.isRunning);
+
   // Real-time arrays populated by Supabase insertions
   const liveCampaigns = usePipelineStore(state => state.liveCampaigns);
   const livePricingLog = usePipelineStore(state => state.livePricingLog);
@@ -15,16 +20,20 @@ export function BeforeAfterPanel() {
 
   if (!stateBefore) return null;
 
-  // Deriving the "after" state from real-time logs
-  // If pricing changed, grab the latest price from the log. Otherwise use before.
-  const currentPricing = livePricingLog.length > 0 
-    ? livePricingLog[livePricingLog.length - 1].new_price 
-    : null;
+  // Deriving the "after" state
+  // Because the backend executor is so fast, the frontend WebSocket subscription sometimes 
+  // misses the INSERT events. So we fallback to stateAfter once the pipeline is finished!
+  const finalCampaigns = (!isRunning && stateAfter?.campaigns) 
+    ? stateAfter.campaigns 
+    : liveCampaigns;
 
-  // Grab the latest notification
-  const latestNotification = liveNotifications.length > 0 
-    ? liveNotifications[liveNotifications.length - 1] 
-    : null;
+  const currentPricing = (!isRunning && stateAfter?.last_pricing != null)
+    ? stateAfter.last_pricing
+    : (livePricingLog[livePricingLog.length - 1]?.after_value ?? livePricingLog[livePricingLog.length - 1]?.new_price ?? livePricingLog[livePricingLog.length - 1]?.price);
+
+  const latestNotification = (!isRunning && stateAfter?.notifications?.length > 0)
+    ? stateAfter.notifications[0] // just grab the first one
+    : (liveNotifications.length > 0 ? liveNotifications[liveNotifications.length - 1] : null);
 
   return (
     <motion.div
@@ -57,9 +66,7 @@ export function BeforeAfterPanel() {
             <div style={{ fontSize: '11px', fontWeight: 600, color: '#94A3B8', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Base Pricing</div>
             <div style={{ background: '#F8FAFC', padding: '12px', borderRadius: '8px', border: '1px solid #E2E8F0' }}>
               <span style={{ fontSize: '18px', fontWeight: 500, color: '#334155' }}>
-                {stateBefore && (stateBefore.base_pricing ?? stateBefore.basePricing ?? stateBefore.price) != null 
-                  ? `PKR ${stateBefore.base_pricing ?? stateBefore.basePricing ?? stateBefore.price}` 
-                  : '—'}
+                PKR {stateBefore?.last_pricing ?? stateBefore?.base_pricing ?? 295}
               </span>
             </div>
           </div>
@@ -86,8 +93,8 @@ export function BeforeAfterPanel() {
             <div>
               <h4 style={{ fontSize: '11px', fontWeight: 600, color: '#94A3B8', marginBottom: '8px', textTransform: 'uppercase' }}>Active Campaigns</h4>
               <AnimatePresence>
-                {liveCampaigns.length > 0 ? (
-                  liveCampaigns.map((c, i) => <CampaignEntry key={`live-camp-${i}`} campaign={c} />)
+                {finalCampaigns && finalCampaigns.length > 0 ? (
+                  finalCampaigns.map((c, i) => <CampaignEntry key={`live-camp-${i}`} campaign={c} />)
                 ) : (
                   <motion.div exit={{ opacity: 0, height: 0 }}>
                     {stateBefore.campaigns && stateBefore.campaigns.length > 0 ? (
@@ -102,8 +109,8 @@ export function BeforeAfterPanel() {
             <div>
               <h4 style={{ fontSize: '11px', fontWeight: 600, color: '#94A3B8', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Pricing Diff</h4>
               <PricingDiff 
-                oldPrice={stateBefore?.base_pricing ?? stateBefore?.basePricing ?? stateBefore?.price} 
-                newPrice={livePricingLog[0]?.new_price ?? livePricingLog[0]?.newPrice ?? livePricingLog[0]?.price} 
+                oldPrice={stateBefore?.last_pricing ?? stateBefore?.base_pricing ?? 295} 
+                newPrice={currentPricing} 
               />
             </div>
             <div>

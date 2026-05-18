@@ -1,0 +1,9 @@
+{
+  "id": 2,
+  "name": "Competitor Price Drop + Inventory Surplus",
+  "description": "Market pressure meets overstock — margin and capacity crisis",
+  "input_signals": [
+    { "type": "text", "content": "Intelligence: Competitor TechMart cut electronics prices 20% this week. Three of our core SKUs now priced 25% higher than theirs." },
+    { "type": "text", "content": "Warehouse: Karachi facility at 94% capacity. Electronics at 60 days stock vs 30-day target. Accessories risk expiry in 45 days." }
+  ]
+}

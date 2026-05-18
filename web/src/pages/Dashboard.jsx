@@ -24,8 +24,10 @@ export function Dashboard() {
   const actionPlan = usePipelineStore(state => state.actionPlan);
   const finalReport = usePipelineStore(state => state.finalReport);
 
-  // Activate realtime Subscriptions once we have a planId
-  useRealtime(planId);
+  // Activate realtime Subscriptions once we have an actionPlan ID
+  // We use actionPlan.id because the backend inserts campaigns/pricing/notifs using the action_plan's UUID!
+  const realTimeId = actionPlan?.id || null;
+  useRealtime(realTimeId);
 
   const renderStepContent = (stepId) => {
     const isDone = completedSteps.includes(stepId);

@@ -12,7 +12,11 @@ export function CampaignEntry({ campaign }) {
   }
 
   const name = campaign.region || campaign.name || campaign.campaignName || campaign.campaign_name || "—";
-  const discount = campaign.discount_percent ?? campaign.discountPercent ?? campaign.discount ?? "—";
+  const discount = campaign.discount_pct ?? campaign.discount_percent ?? campaign.discountPercent ?? campaign.discount ?? 0;
+
+  const statusBadge = campaign.status === 'internal'
+    ? { label: 'INTERNAL', color: 'bg-gray-500 text-white' }
+    : { label: 'ACTIVE', color: 'bg-green-500 text-white' };
 
   return (
     <motion.div
@@ -22,10 +26,12 @@ export function CampaignEntry({ campaign }) {
     >
       <div>
         <div style={{ fontWeight: 600, color: '#166534', fontSize: '13px' }}>{name}</div>
-        <div style={{ color: '#15803D', fontSize: '11px', marginTop: '2px' }}>{discount}% Discount</div>
+        {discount > 0 && (
+          <div style={{ color: '#15803D', fontSize: '11px', marginTop: '2px' }}>{discount}% Discount</div>
+        )}
       </div>
-      <div style={{ background: '#DCFCE7', color: '#16A34A', fontSize: '10px', fontWeight: 600, padding: '3px 8px', borderRadius: '12px' }}>
-        ACTIVE
+      <div className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${statusBadge.color}`}>
+        {statusBadge.label}
       </div>
     </motion.div>
   );

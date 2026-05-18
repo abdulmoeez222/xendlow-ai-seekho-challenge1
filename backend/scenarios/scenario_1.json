@@ -1,0 +1,10 @@
+{
+  "id": 1,
+  "name": "Regional Sales Drop + Fuel Shock",
+  "description": "Three compounding signals hit Lahore distribution simultaneously",
+  "input_signals": [
+    { "type": "text", "content": "Q2 sales report: Lahore region orders declined 25% vs Q1. Electronics down 30%, Appliances down 22%. Revenue gap: PKR 3.2M." },
+    { "type": "text", "content": "Breaking: Pakistan fuel prices up 18% immediately. Petrol now PKR 295/litre. Logistics cost impact expected same day." },
+    { "type": "text", "content": "Vendor alert from Ali Traders: Lead times extended from 2 to 5 weeks — port congestion Karachi. Affects 40% of our SKU catalog." }
+  ]
+}

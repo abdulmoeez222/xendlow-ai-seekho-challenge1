@@ -9,17 +9,22 @@ SyntaxHighlighter.registerLanguage('json', json);
 
 export function TracePanel() {
   const [isExpanded, setIsExpanded] = useState(false);
+  const signals = usePipelineStore(state => state.signals);
+  const insightReport = usePipelineStore(state => state.insightReport);
+  const actionPlan = usePipelineStore(state => state.actionPlan);
   const executionLog = usePipelineStore(state => state.executionLog);
-
-  if (!executionLog) return null;
+  const finalReport = usePipelineStore(state => state.finalReport);
 
   const agentSections = [
-    { key: 'ingestor_log', label: 'Ingestor Log' },
-    { key: 'analyst_log', label: 'Analyst Log' },
-    { key: 'planner_log', label: 'Planner Log' },
-    { key: 'executor_log', label: 'Executor Log' },
-    { key: 'reporter_log', label: 'Reporter Log' },
+    { key: 'ingestor_log', label: 'Ingestor Log', data: signals },
+    { key: 'analyst_log', label: 'Analyst Log', data: insightReport },
+    { key: 'planner_log', label: 'Planner Log', data: actionPlan },
+    { key: 'executor_log', label: 'Executor Log', data: executionLog },
+    { key: 'reporter_log', label: 'Reporter Log', data: finalReport },
   ];
+
+  // If we haven't even started, don't show the panel
+  if (!signals && !executionLog) return null;
 
   return (
     <div style={{ background: '#0F172A', borderRadius: '12px', padding: '14px 20px', border: 'none', overflow: 'hidden' }}>
@@ -47,8 +52,7 @@ export function TracePanel() {
           >
             <div style={{ maxHeight: '600px', overflowY: 'auto' }}>
               {agentSections.map((section) => {
-                const logData = executionLog[section.key];
-                if (!logData) return null;
+                if (!section.data) return null;
                 
                 return (
                   <div key={section.key} style={{ marginBottom: '16px' }}>
@@ -57,7 +61,7 @@ export function TracePanel() {
                       {section.label}
                     </h4>
                     <div data-testid="syntax-highlighter" style={{ fontSize: '11px', lineHeight: 1.8, fontFamily: 'monospace', color: '#F8FAFC', whiteSpace: 'pre-wrap' }}>
-                      {JSON.stringify(logData, null, 2)}
+                      {JSON.stringify(section.data, null, 2)}
                     </div>
                   </div>
                 );

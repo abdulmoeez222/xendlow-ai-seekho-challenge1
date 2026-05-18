@@ -1,0 +1,10 @@
+{
+  "id": 3,
+  "name": "Rupee Devaluation + Import Pipeline",
+  "description": "Currency shock hits dollar-denominated inventory in transit",
+  "input_signals": [
+    { "type": "text", "content": "SBP: PKR depreciated 8.3% vs USD this month. Rate now PKR 285/USD — 18-month high. Further depreciation consensus among analysts." },
+    { "type": "text", "content": "Finance: 70% of inventory is dollar-denominated imports. USD 2.3M in transit. Landed cost increase: estimated PKR 52M." },
+    { "type": "text", "content": "Margin analysis: Import gross margins currently 18%. Post-devaluation: 9.2%. Break-even risk on ACs, LED TVs, Washing Machines." }
+  ]
+}

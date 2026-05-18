@@ -12,8 +12,8 @@ export function TextInput({ onRunCustom }) {
     e.preventDefault();
     if (!inputValue.trim() || isRunning) return;
     
-    // In a real app, shape the signals payload based on the tab
-    const signals = { type: activeTab.toLowerCase(), value: inputValue };
+    // Shape the signals payload as an array of signal objects to match the backend expectation
+    const signals = [{ type: activeTab.toLowerCase(), content: inputValue }];
     if (onRunCustom) onRunCustom(signals);
   };
 

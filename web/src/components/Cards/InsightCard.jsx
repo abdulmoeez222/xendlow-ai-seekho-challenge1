@@ -16,8 +16,10 @@ export function InsightCard({ report }) {
   const severity = getSeverityLevel(score);
 
   const insightText = report.primary_insight || report.primaryInsight || report.insight || "—";
-  const causalChain = report.causal_chain || report.causalChain || report.chain || [];
-  const domains = report.affected_domains || report.affectedDomains || report.domains || [];
+  const rawChain = report.causal_chain || report.causalChain || report.chain || [];
+  const causalChain = Array.isArray(rawChain) ? rawChain : (typeof rawChain === 'string' ? rawChain.split(/\s*(?:→|->|—>|➜)\s*/).filter(Boolean) : []);
+  const rawDomains = report.affected_domains || report.affectedDomains || report.domains || [];
+  const domains = Array.isArray(rawDomains) ? rawDomains : (typeof rawDomains === 'string' ? rawDomains.split(/[,;]/).map(s => s.trim()).filter(Boolean) : []);
 
   return (
     <motion.div
