@@ -6,10 +6,58 @@ from services.gemini_client import generate
 router = APIRouter()
 
 
+def extract_json_from_gemini(response_text: str) -> dict:
+    """
+    Gemini sometimes wraps JSON in markdown fences or adds preamble.
+    This strips all of that and finds the raw JSON object.
+    """
+    import re, json
+
+    text = response_text.strip()
+
+    # Strip markdown code fences if present
+    # Handles ```json ... ``` and ``` ... ```
+    fenced = re.search(r'```(?:json)?\s*([\s\S]*?)```', text)
+    if fenced:
+        text = fenced.group(1).strip()
+
+    # If still not starting with {, find the first { 
+    if not text.startswith('{'):
+        brace_start = text.find('{')
+        if brace_start != -1:
+            text = text[brace_start:]
+
+    # Find matching closing brace (handles nested objects)
+    depth = 0
+    end_idx = -1
+    for i, ch in enumerate(text):
+        if ch == '{':
+            depth += 1
+        elif ch == '}':
+            depth -= 1
+            if depth == 0:
+                end_idx = i + 1
+                break
+
+    if end_idx > 0:
+        text = text[:end_idx]
+
+    return json.loads(text)
+
+
 async def plan_logic(insight_id: str, insight: dict, run_id: str = None) -> dict:
     """Core plan logic — callable from /plan and /run-scenario."""
 
     prompt = f"""
+CRITICAL OUTPUT RULES:
+- Respond with ONLY a raw JSON object.
+- Do NOT wrap in markdown code fences.
+- Do NOT add any text before or after the JSON.
+- Do NOT add explanatory paragraphs.
+- Your entire response must start with {{ and end with }}
+- The JSON must include the field "action_type" set to one of:
+  "campaign" | "pricing" | "notification" | "negotiation"
+
 You are an autonomous business decision agent.
 You receive an InsightReport and COMMIT to one action. Not a list. Not options. One decision.
 
@@ -28,6 +76,8 @@ Before committing to an action, verify:
 - If signals mention supplier delays or extended lead times → NEVER select reorder
 - If signals mention inventory surplus or warehouse at >80% capacity → NEVER select reorder  
 - If signals mention margin compression or currency devaluation → NEVER select campaign/discount
+- If signals mention a client discount request with penalty clauses → PREFER negotiation
+  over campaign. Accepting a discount request is not a campaign action.
 State which constraints you checked and why your action passes all of them.
 
 Available action types:
@@ -35,6 +85,12 @@ Available action types:
   pricing:      cost update (params: item_name, before_value, after_value)
   reorder:      supplier order (params: supplier, sku_count, urgency_days)
   notification: alert (params: channel, recipient_count, message_summary)
+  negotiation: Use when the optimal response involves direct client communication,
+      counter-offers, contract renegotiation, or rejecting a client request while
+      preserving the relationship. Parameters: client_name, current_offer, counter_offer,
+      rationale, contact_channel, urgency_hours.
+      Example: Ayesha Weddings requests 20% discount → counter with 10% + service upgrade
+      instead of accepting full discount or risking cancellation.
 
 IMPORTANT RULES:
 - For projected_reach, estimate a realistic number based on the region population and campaign scope. Do NOT default to 5000.
@@ -44,7 +100,15 @@ IMPORTANT RULES:
 Return JSON only, no markdown fences:
 {{
   "selected_action": "short action name",
-  "action_type": "campaign|pricing|reorder|notification",
+  "action_type": one of "campaign" | "pricing" | "notification" | "negotiation"
+  
+  Rules for selection:
+  - campaign: when the action is a customer-facing discount or promotion
+  - pricing: when the action is adjusting product/service prices
+  - notification: when the action is an internal alert to staff
+  - negotiation: when the action involves direct client/vendor communication,
+                 counter-offers, or relationship management
+                 
   "reasoning": "why this action beats the alternatives — cite specific numbers",
   "parameters": {{ "region": "Lahore", "discount_pct": 15, "duration_days": 14, "projected_reach": 50000 }},
   "fallback_actions": [{{"action": "...", "trigger": "specific measurable condition"}}]
@@ -52,21 +116,12 @@ Return JSON only, no markdown fences:
 """
     try:
         raw = generate(prompt, is_json=True, temperature=0.2)
-        clean = raw.strip().replace("```json", "").replace("```", "").strip()
-        result = json.loads(clean)
+        print(f"[PLANNER RAW] First 500 chars: {raw[:500]}")
+        result = extract_json_from_gemini(raw)
     except Exception as e:
-        print(f"Gemini Plan Error: {e}")
-        try:
-            print(f"Raw output: {raw}")
-        except:
-            pass
-        result = {
-            "selected_action": "Launch regional discount campaign",
-            "action_type": "campaign",
-            "reasoning": "Default fallback — Gemini parse failed.",
-            "parameters": {"region": "National", "discount_pct": 15, "duration_days": 14, "projected_reach": 50000},
-            "fallback_actions": [{"action": "Update delivery pricing", "trigger": "if campaign ROI < 20% in 72h"}],
-        }
+        print(f"[PLANNER PARSE ERROR] Raw response: {raw}")
+        print(f"[PLANNER PARSE ERROR] Exception: {e}")
+        raise  # Don't silently fall back — surface the error
 
     insert_data = {
         "insight_id": insight_id,

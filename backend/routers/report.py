@@ -8,12 +8,25 @@ def build_report_object(insight: dict, plan: dict, execution_log: dict, elapsed_
     """Assemble a FinalReport from the pipeline artifacts.
     Shared by POST /report and POST /run-scenario.
     """
-    reach = plan.get("parameters", {}).get("projected_reach", 50000)
-    discount = plan.get("parameters", {}).get("discount_pct", 15)
-    avg_order_pkr = 12000    # PKR, reasonable for electronics retail
-    conversion_rate = 0.04   # 4% — conservative for discount campaign
-    raw_recovery = reach * conversion_rate * avg_order_pkr
-    recovery = int(min(raw_recovery, 50_000_000))  # Hard cap at PKR 50M
+    action_type = plan.get('action_type', 'campaign')
+    params = plan.get('parameters', {})
+
+    if action_type == 'notification':
+        reach = params.get('recipient_count', 20)
+        revenue_at_risk = params.get('revenue_at_risk', None)
+        if revenue_at_risk:
+            recovery_str = f"PKR {revenue_at_risk} protected"
+        else:
+            recovery_str = "Escalated to management"
+
+    elif action_type == 'pricing':
+        reach = params.get('projected_reach', 500)
+        margin_recovery = params.get('margin_recovery', None)
+        recovery_str = f"PKR {margin_recovery}" if margin_recovery else "Margin stabilized"
+
+    else:  # campaign
+        reach = params.get('projected_reach', 5000)
+        recovery_str = f"PKR {reach * 240:,}"
     return {
         "insight":                    insight.get("primary_insight", ""),
         "causal_chain":               insight.get("causal_chain", ""),
@@ -21,7 +34,7 @@ def build_report_object(insight: dict, plan: dict, execution_log: dict, elapsed_
         "selected_action":            plan.get("selected_action", ""),
         "reasoning":                  plan.get("reasoning", ""),
         "simulations_executed":       len(execution_log.get("actions_taken", [])),
-        "projected_revenue_recovery": f"PKR {recovery:,}",
+        "projected_revenue_recovery": recovery_str,
         "projected_reach":            reach,
         "execution_time_ms":          elapsed_ms,
         "before_state":               execution_log.get("before_snapshot", {}),

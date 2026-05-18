@@ -27,6 +27,10 @@ def parse_price(val, fallback: float) -> float:
 # ── Product base prices by category ──
 
 PRODUCT_BASE_PRICES = {
+    "wedding": 150000.0,
+    "catering": 150000.0,
+    "event": 120000.0,
+    "booking": 150000.0,
     "ac": 85000.0,
     "air condition": 85000.0,
     "led": 45000.0,
@@ -39,9 +43,14 @@ PRODUCT_BASE_PRICES = {
 
 
 def get_product_base(plan: dict) -> float:
-    item = str(plan.get('parameters', {}).get('item_name', '')).lower()
+    sources = [
+        str(plan.get('parameters', {}).get('item_name', '')),
+        str(plan.get('selected_action', '')),
+        str(plan.get('parameters', {}).get('rationale', ''))
+    ]
+    combined = ' '.join(sources).lower()
     for key, price in PRODUCT_BASE_PRICES.items():
-        if key in item:
+        if key in combined:
             return price
     return PRODUCT_BASE_PRICES['default']
 
@@ -126,24 +135,54 @@ async def _execute_logic_inner(plan_id: str, plan: dict) -> dict:
     # ══════════════════════════════════════════════════════
     # 2. CAMPAIGN simulation — branches by action_type
     # ══════════════════════════════════════════════════════
-    if action_type == 'notification':
-        campaign_row = db.table("campaigns").insert({
+    if action_type == 'campaign':
+        is_recovery = any(w in plan.get('selected_action', '').lower()
+                          for w in ['recover', 'crisis', 'alert', 'negotiate'])
+        campaign_prefix = "Recovery Campaign" if is_recovery else "Growth Campaign"
+        campaign_name = f"{campaign_prefix} — {params.get('region', 'National')}"
+        
+        campaign_insert = {
             "plan_id": plan_id,
-            "name": f"Internal Alert — {params.get('channel', 'Ops')}",
-            "region": params.get('region', 'National'),
-            "discount_pct": 0,
-            "status": "internal",
-            "projected_reach": params.get('recipient_count', 20)
-        }).execute().data[0]
-    else:
-        campaign_row = db.table("campaigns").insert({
-            "plan_id": plan_id,
-            "name": f"Recovery Campaign — {params.get('region', 'National')}",
+            "name": campaign_name,
             "region": params.get('region', 'National'),
             "discount_pct": params.get('discount_pct', 15),
             "status": "active",
-            "projected_reach": params.get('projected_reach', 50000)
-        }).execute().data[0]
+            "projected_reach": params.get('projected_reach', 5000)
+        }
+
+    elif action_type == 'pricing':
+        # Client-specific pricing adjustment — not a public campaign
+        item = params.get('item_name', 'Client Account')
+        campaign_insert = {
+            "plan_id": plan_id,
+            "name": f"Pricing Adjustment — {item}",
+            "region": params.get('region', 'National'),
+            "discount_pct": 0,
+            "status": "internal",
+            "projected_reach": 1   # client-specific, not mass
+        }
+
+    elif action_type == 'negotiation':
+        campaign_insert = {
+            "plan_id": plan_id,
+            "name": f"Client Negotiation — {params.get('client_name', 'Key Account')}",
+            "region": params.get('region', 'National'),
+            "discount_pct": 0,
+            "status": "internal",
+            "projected_reach": 1
+        }
+
+    else:  # notification
+        campaign_insert = {
+            "plan_id": plan_id,
+            "name": f"Internal Alert — {params.get('channel', 'Management')}",
+            "region": params.get('region', 'National'),
+            "discount_pct": 0,
+            "status": "internal",
+            "projected_reach": params.get('recipient_count', 10)
+        }
+        
+    campaign_row = db.table("campaigns").insert(campaign_insert).execute().data[0]
 
     # ══════════════════════════════════════════════════════
     # 3. PRICING simulation — direction depends on action_type
@@ -162,8 +201,10 @@ async def _execute_logic_inner(plan_id: str, plan: dict) -> dict:
             params.get('after_value'),
             round(before_val * 1.09, 2)   # default 9% pass-through
         )
-    else:  # notification
-        after_val = round(before_val * 1.05, 2)
+    elif action_type == 'negotiation':
+        after_val = before_val
+    else:  # notification — no price change
+        after_val = before_val
 
     before['last_pricing'] = before_val
 
@@ -212,7 +253,31 @@ Rules:
 Return only the message text.
 """
 
+    elif action_type == 'negotiation':
+        notify_prompt = f"""
+Write a 2-sentence internal WhatsApp alert to the sales/account team.
+Action: Client negotiation initiated
+Client: {params.get('client_name', 'Key Account')}
+Situation: {params.get('rationale', plan.get('selected_action', ''))}
+Counter-offer prepared: {params.get('counter_offer', 'See action plan')}
+Urgency: Respond within {params.get('urgency_hours', 48)} hours
+
+Rules:
+- Professional and urgent tone
+- Internal use only — do NOT mention discounts to customers
+- Do NOT use the word "discount"
+- This is an account management escalation
+Return only the message text. No labels. No quotes.
+"""
+
     else:  # campaign
+        region = params.get('region', 'National')
+        # Ensure region is a real string, not a template placeholder
+        if not region or region == 'National':
+            region_greeting = 'Nationwide'
+        else:
+            region_greeting = region
+            
         notify_prompt = f"""
 Write a customer-facing WhatsApp promotion message.
 Region: {region}
@@ -221,7 +286,7 @@ Duration: {params.get('duration_days', 14)} days
 Campaign: {plan.get('selected_action', '')}
 
 Rules:
-- Open by addressing the city/region directly
+- Open by addressing the audience as '{region_greeting}'
 - State the discount % and duration explicitly
 - End with a single call to action
 - Maximum 3 sentences
