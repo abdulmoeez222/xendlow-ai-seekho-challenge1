@@ -1,10 +1,10 @@
 Traceback (most recent call last):
-  File "C:\Users\saadk\Downloads\xendlow-ai-seekho-challenge1\backend\routers\execute.py", line 90, in execute_logic
+  File "C:\Users\saadk\Downloads\xendlow-ai-seekho-challenge1\backend\routers\execute.py", line 99, in execute_logic
     return await _execute_logic_inner(plan_id, plan)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\Users\saadk\Downloads\xendlow-ai-seekho-challenge1\backend\routers\execute.py", line 137, in _execute_logic_inner
-    }).execute().data[0]
-       ^^^^^^^^^
+  File "C:\Users\saadk\Downloads\xendlow-ai-seekho-challenge1\backend\routers\execute.py", line 193, in _execute_logic_inner
+    campaign_row = db.table("campaigns").insert(campaign_insert).execute().data[0]
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   File "C:\Users\saadk\AppData\Local\Programs\Python\Python311\Lib\site-packages\postgrest\_sync\request_builder.py", line 78, in execute
     raise APIError(r.json())
-postgrest.exceptions.APIError: {'code': '23503', 'details': 'Key (plan_id)=(557b4541-34ab-431c-b385-524c8c011c5c) is not present in table "action_plans".', 'hint': None, 'message': 'insert or update on table "campaigns" violates foreign key constraint "campaigns_plan_id_fkey"'}
+postgrest.exceptions.APIError: {'code': '22P02', 'details': None, 'hint': None, 'message': 'invalid input syntax for type integer: "Relevant HR and Operations leads"'}

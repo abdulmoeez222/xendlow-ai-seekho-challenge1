@@ -111,23 +111,31 @@ async def _execute_logic_inner(plan_id: str, plan: dict) -> dict:
     params = plan.get("parameters") or {}
     region = params.get("region", "National")
 
-    # ── Infer action_type when Planner omits it ──
-    action_type = (plan.get('action_type') or '').strip().lower()
-
+    action_type = plan.get('action_type', '').strip().lower()
     if not action_type:
-        selected = (plan.get('selected_action') or '').lower()
+        selected = plan.get('selected_action', '').lower()
+        params = plan.get('parameters', {})
         if 'channel' in params or any(
-            w in selected for w in ['notify', 'alert', 'expedite',
-                                     'stakeholder', 'meeting', 'inform']
+            w in selected for w in [
+                'notify', 'alert', 'expedite', 'stakeholder',
+                'meeting', 'inform', 'negotiate', 'review',
+                'escalate', 'hire', 'source', 'contact'
+            ]
         ):
             action_type = 'notification'
         elif any(
-            w in selected for w in ['price', 'pricing', 'adjust',
-                                     'increase', 'decrease', 'margin']
+            w in selected for w in [
+                'price', 'pricing', 'adjust', 'increase',
+                'decrease', 'margin'
+            ]
         ):
             action_type = 'pricing'
         else:
             action_type = 'campaign'
+
+    KNOWN_TYPES = {'campaign', 'pricing', 'notification'}
+    if action_type not in KNOWN_TYPES:
+        action_type = 'notification'
 
     # 1. Before snapshot (no plan_id — anchor baseline)
     before = _state_snapshot()
@@ -226,10 +234,17 @@ async def _execute_logic_inner(plan_id: str, plan: dict) -> dict:
     # action_type already resolved at top of execute_logic
 
     if action_type == 'notification':
+        situation_text = (
+            params.get('message_summary')
+            or params.get('rationale')
+            or params.get('counter_offer')
+            or plan.get('selected_action', 'Action required')
+        )
+        
         notify_prompt = f"""
 Write a 2-sentence internal WhatsApp alert.
 Recipient team: {params.get('channel', 'Management')}
-Situation: {params.get('message_summary', plan.get('selected_action', ''))}
+Situation: {situation_text}
 
 Rules:
 - Professional and urgent tone

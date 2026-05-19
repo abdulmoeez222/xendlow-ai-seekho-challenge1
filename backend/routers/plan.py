@@ -70,6 +70,7 @@ Rules:
 3. Select the highest-scoring one — you commit to this
 4. Write 2-3 sentences: why this action over the other two. Reference specific numbers (costs, percentages, capacity figures, fees like PKR 85,000 overage). Write your reasoning entirely in your own words. Never quote from the InsightReport using quotation marks. Explain the situation as if briefing a board member who has not read the report.
 5. Define one fallback with a specific measurable trigger condition
+6. If the InsightReport mentions a penalty clause, cancellation fee, or financial consequence of inaction, you MUST reference the specific PKR amount in your reasoning. Omitting it is not allowed.
 
 CONSTRAINT CHECK (mandatory before selecting):
 Before committing to an action, verify:

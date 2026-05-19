@@ -11,7 +11,7 @@ export function CampaignEntry({ campaign }) {
     );
   }
 
-  const name = campaign.region || campaign.name || campaign.campaignName || campaign.campaign_name || "—";
+  const name = campaign.name || campaign.campaignName || campaign.campaign_name || campaign.region || "—";
   const discount = campaign.discount_pct ?? campaign.discount_percent ?? campaign.discountPercent ?? campaign.discount ?? 0;
 
   const statusBadge = campaign.status === 'internal'

@@ -26,9 +26,10 @@ SIGNALS:
 Return JSON only, no markdown fences:
 {{
   "primary_insight": "One sentence — how the signals relate, not what they say",
-  "causal_chain": "[Signal A effect] → [causes X] → [which combines with Signal B effect] → [resulting in Y]",
+  "causal_chain": "Your chain MUST include any specific financial consequences mentioned in the signals — penalty clauses, cancellation fees, or contractual obligations. If a PKR amount appears in the signals as a consequence of inaction, include it explicitly in the chain using the exact figure.",
   "severity_score": 0.0,
-  "affected_domains": ["domain1", "domain2"]
+  "affected_domains": ["domain1", "domain2"],
+  "key_figures": ["list of critical PKR amounts, percentages, or timeframes that decision-makers must know immediately"]
 }}
 
 CRITICAL CONSTRAINTS:
@@ -49,6 +50,7 @@ CRITICAL CONSTRAINTS:
             "causal_chain": "Analysis failed.",
             "severity_score": 5.0,
             "affected_domains": [],
+            "key_figures": [],
         }
 
     # Write to Supabase
@@ -61,6 +63,7 @@ CRITICAL CONSTRAINTS:
             "causal_chain": result.get("causal_chain", ""),
             "severity_score": result.get("severity_score", 5.0),
             "affected_domains": result.get("affected_domains", []),
+            "key_figures": result.get("key_figures", []),
         })
         .execute()
         .data[0]

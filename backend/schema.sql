@@ -17,6 +17,7 @@ create table if not exists insight_reports (
   causal_chain text,
   severity_score float4,
   affected_domains text[],
+  key_figures jsonb default '[]',
   created_at timestamptz default now()
 );
 
