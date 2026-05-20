@@ -11,4 +11,14 @@ export const api = {
   getStateAfter: (planId) => fetch(`${BASE}/state/after/${planId}`).then(r => r.json()),
   getLogs: (planId) => fetch(`${BASE}/logs/${planId}`).then(r => r.json()),
   getScenarios: () => fetch(`${BASE}/scenarios`).then(r => r.json()),
+  approvePlan: (planId) => fetch(`${BASE}/approve-plan`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ plan_id: planId })
+  }).then(r => r.json()),
+  rejectPlan: (planId) => fetch(`${BASE}/reject-plan`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ plan_id: planId })
+  }).then(r => r.json()),
 }

@@ -90,3 +90,50 @@ create table if not exists pipeline_runs (
   created_at timestamptz default now(),
   updated_at timestamptz default now()
 );
+
+create table if not exists shopify_products (
+  id uuid primary key default gen_random_uuid(),
+  sku text unique not null,
+  name text not null,
+  current_price float4 not null,
+  cost_of_goods float4 not null,
+  profit_margin float4 not null,
+  stock_level int4 not null,
+  status text not null,
+  created_at timestamptz default now()
+);
+
+create table if not exists marketing_campaigns (
+  id uuid primary key default gen_random_uuid(),
+  network text not null, -- 'meta' or 'google'
+  campaign_name text not null,
+  spend float4 not null,
+  clicks int4 not null,
+  conversions int4 not null,
+  roas float4 not null,
+  active boolean default true,
+  created_at timestamptz default now()
+);
+
+create table if not exists competitor_prices (
+  id uuid primary key default gen_random_uuid(),
+  product_name text not null,
+  competitor_name text not null,
+  price float4 not null,
+  created_at timestamptz default now()
+);
+
+create table if not exists logistics_rates (
+  id uuid primary key default gen_random_uuid(),
+  city text not null,
+  carrier text not null,
+  base_shipping_fee float4 not null,
+  created_at timestamptz default now()
+);
+CREATE TABLE IF NOT EXISTS raw_signals (
+  id uuid primary key default gen_random_uuid(),
+  run_id uuid,
+  raw_content text,
+  created_at timestamptz default now()
+);
+

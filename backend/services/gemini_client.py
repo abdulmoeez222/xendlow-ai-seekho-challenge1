@@ -7,11 +7,15 @@ _client = None
 def get_client():
     global _client
     if _client is None:
-        _client = genai.Client(
-            vertexai=True,
-            project="ai-seekho-challenge",
-            location="us-central1",
-        )
+        api_key = os.getenv("GEMINI_API_KEY")
+        if api_key:
+            _client = genai.Client(api_key=api_key)
+        else:
+            _client = genai.Client(
+                vertexai=True,
+                project="ai-seekho-challenge",
+                location="us-central1",
+            )
     return _client
 
 

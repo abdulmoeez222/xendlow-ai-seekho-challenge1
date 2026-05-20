@@ -12,7 +12,7 @@ build/
 .env.development
 
 # Hackathon private files
-OMER_Antigravity_Prompt.md
+*Antigravity_Prompt.md
 .antigravity_rules.md
 
 # OS files
@@ -44,8 +44,8 @@ mobile/.flutter-plugins
 mobile/.flutter-plugins-dependencies
 
 # Python
-backend/__pycache__/
-backend/*.pyc
+**/__pycache__/
+**/*.pyc
 backend/venv/
 backend/.venv/
 

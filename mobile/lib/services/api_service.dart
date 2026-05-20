@@ -29,4 +29,24 @@ class ApiService {
     if (res.statusCode == 200) return jsonDecode(res.body);
     throw Exception('Failed to get state after');
   }
+
+  static Future<Map<String, dynamic>> approvePlan(String planId) async {
+    final res = await client.post(
+      Uri.parse('$_base/approve-plan'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'plan_id': planId}),
+    );
+    if (res.statusCode == 200) return jsonDecode(res.body);
+    throw Exception('Failed to approve plan');
+  }
+
+  static Future<Map<String, dynamic>> rejectPlan(String planId) async {
+    final res = await client.post(
+      Uri.parse('$_base/reject-plan'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'plan_id': planId}),
+    );
+    if (res.statusCode == 200) return jsonDecode(res.body);
+    throw Exception('Failed to reject plan');
+  }
 }

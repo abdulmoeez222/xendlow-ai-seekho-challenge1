@@ -31,9 +31,9 @@ async def run_scenario(scenario_id: int, background_tasks: BackgroundTasks):
     # 2. Generate tracking ID for UI Stepper
     run_id = str(uuid.uuid4())
 
-    # 3. Run the pipeline via the 5-Agent Orchestrator in the background
+    # 3. Run the pipeline via the 5-Agent Orchestrator (Phase 1) in the background
     engine = InsightEngine(scenario, run_id)
-    background_tasks.add_task(engine.run)
+    background_tasks.add_task(engine.run_phase1)
 
     return {"plan_id": run_id}
 
@@ -49,7 +49,7 @@ async def run_custom(body: dict, background_tasks: BackgroundTasks):
     }
     
     engine = InsightEngine(scenario, run_id)
-    background_tasks.add_task(engine.run)
+    background_tasks.add_task(engine.run_phase1)
 
     return {"plan_id": run_id}
 

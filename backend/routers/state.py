@@ -39,7 +39,7 @@ def get_logs(plan_id: str):
         .maybe_single()
         .execute()
     )
-    if not run.data:
+    if run is None or not run.data:
         return {"plan_id": plan_id, "status": "not_found"}
 
     r = run.data

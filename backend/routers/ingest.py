@@ -73,20 +73,40 @@ Return exactly:
             "summary": "No content provided" if not raw_text.strip() else raw_text[:100],
         }
 
-    # ── Step 3: Write to Supabase ─────────────────────────────────────────────
+    # Insert summary into signals table (short excerpt)
+    summary_content = raw_text[:500]  # keep first 500 chars as summary
     row = (
         get_supabase()
         .table("signals")
         .insert({
             "source_type": input_type,
-            "raw_content": raw_text[:10000],
+            "raw_content": summary_content,
             "normalized_json": normalized,
         })
         .execute()
         .data[0]
     )
 
+    # Insert full raw content into raw_signals linked by signal id
+    get_supabase().table("raw_signals").insert({
+        "run_id": row["id"],
+        "raw_content": raw_text,
+    }).execute()
+
     return {"signals": [row]}
+
+# Endpoint to fetch full raw content for a given signal id
+@router.get("/raw/{signal_id}")
+async def get_raw_signal(signal_id: str):
+    result = (
+        get_supabase()
+        .table("raw_signals")
+        .select("raw_content")
+        .eq("run_id", signal_id)
+        .single()
+        .execute()
+    )
+    return {"raw_content": result.data.get("raw_content")}
 
 
 @router.post("/ingest")
