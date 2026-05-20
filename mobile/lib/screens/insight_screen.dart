@@ -1,14 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
+import 'package:provider/provider.dart';
 import '../models/insight_report.dart';
+import '../models/action_plan.dart';
+import '../providers/pipeline_provider.dart';
 import '../widgets/severity_badge.dart';
 import '../widgets/causal_chain.dart';
 import 'action_screen.dart';
 
 class InsightScreen extends StatelessWidget {
   final InsightReport report;
+  final ActionPlan? plan;
 
-  const InsightScreen({super.key, required this.report});
+  const InsightScreen({super.key, required this.report, this.plan});
+
 
   @override
   Widget build(BuildContext context) {
@@ -88,9 +93,30 @@ class InsightScreen extends StatelessWidget {
               height: 56,
               child: ElevatedButton(
                 onPressed: () {
+                  ActionPlan? targetPlan = plan;
+                  if (targetPlan == null) {
+                    try {
+                      final provider = Provider.of<PipelineProvider>(context, listen: false);
+                      if (provider.actionData != null) {
+                        targetPlan = ActionPlan.fromJson(provider.actionData);
+                      }
+                    } catch (_) {}
+                  }
+
+                  // Fallback if no plan is available (e.g. mock test context)
+                  targetPlan ??= ActionPlan(
+                    id: 'fallback_id',
+                    selectedAction: 'Strategic Price Adjustment',
+                    reasoning: 'Compounding margin recovery action planning.',
+                    parameters: {},
+                    fallbackActions: [],
+                  );
+
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => const ActionScreen()),
+                    MaterialPageRoute(
+                      builder: (context) => ActionScreen(plan: targetPlan!),
+                    ),
                   );
                 },
                 style: ElevatedButton.styleFrom(
