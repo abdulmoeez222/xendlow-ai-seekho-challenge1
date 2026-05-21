@@ -17,63 +17,64 @@ export function ProductsCatalog() {
   const lowStockCount = products.filter(p => p.stock_level < 15).length;
 
   return (
-    <div className="flex-1 p-8 overflow-y-auto bg-[#0F172A] text-white">
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold">Products Catalog</h2>
+    <div className="flex-1 p-8 overflow-y-auto bg-[#0A0A0A] text-white">
+      <div className="flex justify-between items-center mb-8 border-b border-[#1F1F1F] pb-4">
+        <h2 className="text-sm font-semibold tracking-tight uppercase">Products Catalog</h2>
+        <span className="text-xs text-[#555555]">{products.length} Items Listed</span>
       </div>
       
       {lowStockCount > 0 && (
-        <div className="mb-6 p-4 bg-red-900/20 border border-red-900/40 rounded-xl flex items-center gap-3">
-          <svg className="w-5 h-5 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-          </svg>
-          <span className="text-white font-medium">{lowStockCount} SKU near stockout — reorder threshold breached</span>
+        <div className="mb-6 p-4 bg-[#111111] border border-[#222222] rounded-xl flex items-center gap-3">
+          <div className="w-2 h-2 rounded-full bg-[#FF9999]" />
+          <span className="text-[#8C8C8C] text-xs font-medium">
+            {lowStockCount} SKU near stockout — reorder threshold breached
+          </span>
         </div>
       )}
 
       {isLoading ? (
         <div className="flex justify-center p-12">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div>
         </div>
       ) : (
-        <div className="bg-slate-800/50 rounded-2xl border border-slate-700/50 overflow-hidden shadow-sm">
+        <div className="bg-[#111111] rounded-xl border border-[#222222] overflow-hidden shadow-sm">
           <table className="w-full text-left">
-            <thead className="bg-slate-900/80 text-slate-400 text-xs uppercase font-semibold">
+            <thead className="bg-[#161616] text-[#555555] text-[10px] uppercase font-bold tracking-wider border-b border-[#222222]">
               <tr>
-                <th className="px-6 py-4">Product</th>
-                <th className="px-6 py-4">SKU</th>
-                <th className="px-6 py-4">Price</th>
-                <th className="px-6 py-4">COGS</th>
-                <th className="px-6 py-4">Margin</th>
-                <th className="px-6 py-4 text-center">Stock</th>
-                <th className="px-6 py-4 text-right">Status</th>
+                <th className="px-6 py-3.5">Product</th>
+                <th className="px-6 py-3.5">SKU</th>
+                <th className="px-6 py-3.5">Price</th>
+                <th className="px-6 py-3.5">COGS</th>
+                <th className="px-6 py-3.5">Margin</th>
+                <th className="px-6 py-3.5 text-center">Stock</th>
+                <th className="px-6 py-3.5 text-right">Status</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-700/50">
+            <tbody className="divide-y divide-[#1F1F1F]">
               {products.map(p => {
                 const margin = ((p.current_price - p.cost_of_goods) / p.current_price) * 100;
                 const isLowStock = p.stock_level < 15;
                 const isAtRisk = p.status.toLowerCase() === 'at risk';
                 
                 return (
-                  <tr key={p.id} className="hover:bg-slate-800/80 transition-colors">
-                    <td className="px-6 py-4 font-semibold text-white">{p.name}</td>
-                    <td className="px-6 py-4 text-slate-400 text-sm">{p.sku}</td>
-                    <td className="px-6 py-4 text-white font-medium">PKR {p.current_price.toLocaleString()}</td>
-                    <td className="px-6 py-4 text-slate-400">PKR {p.cost_of_goods.toLocaleString()}</td>
-                    <td className={`px-6 py-4 font-semibold ${margin < 20 ? 'text-red-400' : 'text-green-400'}`}>
+                  <tr key={p.id} className="hover:bg-[#161616]/50 transition-colors">
+                    <td className="px-6 py-4 text-xs font-semibold text-white">{p.name}</td>
+                    <td className="px-6 py-4 text-[#8C8C8C] text-xs font-mono">{p.sku}</td>
+                    <td className="px-6 py-4 text-white text-xs font-medium">PKR {p.current_price.toLocaleString()}</td>
+                    <td className="px-6 py-4 text-[#8C8C8C] text-xs">PKR {p.cost_of_goods.toLocaleString()}</td>
+                    <td className={`px-6 py-4 text-xs font-semibold ${margin < 20 ? 'text-[#FF9999]' : 'text-white'}`}>
                       {margin.toFixed(0)}%
                     </td>
                     <td className="px-6 py-4 text-center">
-                      <span className={`px-3 py-1 rounded-full text-xs font-bold ${
-                        isLowStock ? 'bg-red-500/20 text-red-500 border border-red-500/30' : 'text-slate-300'
+                      <span className={`text-xs font-medium ${
+                        isLowStock ? 'text-[#FF9999]' : 'text-[#8C8C8C]'
                       }`}>
                         {p.stock_level}
                       </span>
                     </td>
                     <td className="px-6 py-4 text-right">
-                      <span className={`px-3 py-1 rounded-full text-xs font-bold ${
-                        isAtRisk ? 'bg-red-500/20 text-red-500 border border-red-500/30' : 'bg-green-500/20 text-green-400 border border-green-500/30'
+                      <span className={`text-xs font-semibold uppercase tracking-wider ${
+                        isAtRisk ? 'text-[#FF9999]' : 'text-[#8C8C8C]'
                       }`}>
                         {p.status}
                       </span>

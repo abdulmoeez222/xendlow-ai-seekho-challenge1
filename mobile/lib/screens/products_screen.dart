@@ -2,6 +2,24 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../widgets/app_drawer.dart';
 
+const _bg            = Color(0xFF0A0A0A);
+const _surface       = Color(0xFF111111);
+const _border        = Color(0xFF1F1F1F);
+const _borderSubtle  = Color(0xFF161616);
+const _textPrimary   = Color(0xFFFFFFFF);
+const _textSecondary = Color(0xFF8C8C8C);
+const _textTertiary  = Color(0xFF444444);
+
+AppBar _appBar(String title) => AppBar(
+  backgroundColor: _bg, elevation: 0, scrolledUnderElevation: 0,
+  iconTheme: const IconThemeData(color: _textPrimary),
+  title: Text(title, style: const TextStyle(color: _textPrimary, fontSize: 15, fontWeight: FontWeight.w600)),
+  bottom: const PreferredSize(
+    preferredSize: Size.fromHeight(1),
+    child: Divider(height: 1, color: Color(0xFF1A1A1A)),
+  ),
+);
+
 class ProductsScreen extends StatefulWidget {
   const ProductsScreen({super.key});
 
@@ -16,150 +34,83 @@ class _ProductsScreenState extends State<ProductsScreen> {
   int _lowStockCount = 0;
 
   @override
-  void initState() {
-    super.initState();
-    _fetchProducts();
-  }
+  void initState() { super.initState(); _fetchProducts(); }
 
   Future<void> _fetchProducts() async {
     try {
-      final res = await _supabase
-          .from('shopify_products')
-          .select()
-          .order('sku', ascending: true);
-      
-      final list = res as List<dynamic>? ?? [];
-      int lowStock = 0;
-      for (var p in list) {
-        final stock = p['stock_level'] ?? 0;
-        if (stock < 15) {
-          lowStock++;
-        }
-      }
-      
-      if (mounted) {
-        setState(() {
-          _products = list;
-          _lowStockCount = lowStock;
-          _isLoading = false;
-        });
-      }
-    } catch (e) {
-      if (mounted) {
-        setState(() => _isLoading = false);
-      }
+      final list = (await _supabase.from('shopify_products').select().order('sku')) as List<dynamic>? ?? [];
+      int low = 0;
+      for (var p in list) if ((p['stock_level'] ?? 0) < 15) low++;
+      if (mounted) setState(() { _products = list; _lowStockCount = low; _isLoading = false; });
+    } catch (_) {
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0F172A),
+      backgroundColor: _bg,
       drawer: const AppDrawer(currentRoute: 'products'),
-      appBar: AppBar(
-        title: const Text(
-          'Products Catalog',
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-        ),
-        backgroundColor: const Color(0xFF0F172A),
-        elevation: 0,
-        iconTheme: const IconThemeData(color: Colors.white),
-        actions: [
-          Container(
-            margin: const EdgeInsets.only(right: 16),
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-            decoration: BoxDecoration(
-              color: const Color(0xFF1E293B),
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: const Color(0xFF334155)),
-            ),
-            child: const Row(
-              children: [
-                Icon(Icons.dark_mode_rounded, color: Colors.amber, size: 16),
-                SizedBox(width: 4),
-                Text(
-                  '15',
-                  style: TextStyle(
-                    color: Colors.amber,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 13,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
+      appBar: _appBar('Products'),
       body: RefreshIndicator(
+        color: _textPrimary,
+        backgroundColor: _surface,
         onRefresh: _fetchProducts,
         child: Column(
           children: [
             if (_isLoading)
-              const LinearProgressIndicator(color: Color(0xFF2563EB), backgroundColor: Color(0xFF1E293B)),
-            
-            // Warnings Banner
+              const LinearProgressIndicator(color: _textPrimary, backgroundColor: _borderSubtle, minHeight: 1),
+
             if (_lowStockCount > 0)
               Container(
                 width: double.infinity,
-                margin: const EdgeInsets.all(16),
-                padding: const EdgeInsets.all(12),
+                margin: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF7F1D1D).withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: const Color(0xFFB91C1C).withOpacity(0.4)),
+                  color: _surface,
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: _border),
                 ),
                 child: Row(
                   children: [
-                    const Icon(Icons.error_outline_rounded, color: Colors.redAccent, size: 20),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        '$_lowStockCount SKU near stockout — reorder threshold breached',
-                        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w500, fontSize: 13),
-                      ),
+                    Container(
+                      width: 6, height: 6,
+                      decoration: const BoxDecoration(shape: BoxShape.circle, color: Color(0xFFFF9999)),
+                    ),
+                    const SizedBox(width: 10),
+                    Text(
+                      '$_lowStockCount SKU near stockout — reorder threshold breached',
+                      style: const TextStyle(color: _textSecondary, fontSize: 13),
                     ),
                   ],
                 ),
               ),
-            
+
             Expanded(
               child: _products.isEmpty && !_isLoading
-                  ? const Center(
-                      child: Text(
-                        'No products found.',
-                        style: TextStyle(color: Colors.grey),
-                      ),
-                    )
+                  ? const Center(child: Text('No products found.', style: TextStyle(color: _textTertiary, fontSize: 14)))
                   : ListView.builder(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
                       itemCount: _products.length,
-                      itemBuilder: (context, index) {
-                        final p = _products[index];
-                        final double price = (p['current_price'] ?? 0).toDouble();
-                        final double cogs = (p['cost_of_goods'] ?? 0).toDouble();
-                        final double marginPct = price > 0 ? (price - cogs) / price : 0;
-                        final int stock = p['stock_level'] ?? 0;
-                        final String name = p['name'] ?? '';
-                        final String sku = p['sku'] ?? '';
+                      itemBuilder: (ctx, i) {
+                        final p = _products[i];
+                        final double price  = (p['current_price'] ?? 0).toDouble();
+                        final double cogs   = (p['cost_of_goods']  ?? 0).toDouble();
+                        final double margin = price > 0 ? (price - cogs) / price : 0;
+                        final int    stock  = p['stock_level'] ?? 0;
+                        final String name   = p['name']   ?? '';
+                        final String sku    = p['sku']    ?? '';
                         final String status = p['status'] ?? 'Active';
-
-                        // Decide colors based on inventory metrics
-                        Color stockColor = Colors.greenAccent;
-                        if (stock < 5) {
-                          stockColor = Colors.redAccent;
-                        } else if (stock < 15) {
-                          stockColor = Colors.orangeAccent;
-                        }
-
-                        Color statusColor = status.toLowerCase() == 'at risk' ? Colors.redAccent : Colors.greenAccent;
+                        final bool   atRisk = status.toLowerCase() == 'at risk' || stock < 5;
 
                         return Container(
-                          margin: const EdgeInsets.only(bottom: 12),
-                          padding: const EdgeInsets.all(16),
+                          margin: const EdgeInsets.only(bottom: 8),
+                          padding: const EdgeInsets.all(14),
                           decoration: BoxDecoration(
-                            color: const Color(0xFF1E293B),
-                            borderRadius: BorderRadius.circular(16),
-                            border: Border.all(color: Colors.white.withOpacity(0.05)),
+                            color: _surface,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: _border),
                           ),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -170,91 +121,34 @@ class _ProductsScreenState extends State<ProductsScreen> {
                                   Expanded(
                                     child: Text(
                                       name,
-                                      style: const TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.bold,
-                                      ),
+                                      style: const TextStyle(color: _textPrimary, fontSize: 14, fontWeight: FontWeight.w500),
                                     ),
                                   ),
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                                    decoration: BoxDecoration(
-                                      color: statusColor.withOpacity(0.15),
-                                      borderRadius: BorderRadius.circular(8),
-                                      border: Border.all(color: statusColor.withOpacity(0.3)),
+                                  if (atRisk)
+                                    Container(
+                                      width: 6, height: 6,
+                                      margin: const EdgeInsets.only(left: 8),
+                                      decoration: const BoxDecoration(shape: BoxShape.circle, color: Color(0xFFFF9999)),
                                     ),
-                                    child: Text(
-                                      status,
-                                      style: TextStyle(
-                                        color: statusColor,
-                                        fontSize: 11,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  ),
                                 ],
                               ),
-                              const SizedBox(height: 4),
-                              Text(
-                                'SKU: $sku',
-                                style: const TextStyle(color: Colors.grey, fontSize: 13),
-                              ),
-                              const SizedBox(height: 16),
+                              const SizedBox(height: 3),
+                              Text('SKU: $sku', style: const TextStyle(color: _textTertiary, fontSize: 11)),
+                              const SizedBox(height: 14),
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
-                                  Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      const Text('Price', style: TextStyle(color: Colors.grey, fontSize: 11)),
-                                      const SizedBox(height: 2),
-                                      Text(
-                                        'PKR ${price.toStringAsFixed(0)}',
-                                        style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold),
-                                      ),
-                                    ],
+                                  _Stat(label: 'Price',  value: 'PKR ${price.toStringAsFixed(0)}'),
+                                  _Stat(label: 'COGS',   value: 'PKR ${cogs.toStringAsFixed(0)}'),
+                                  _Stat(
+                                    label: 'Margin',
+                                    value: '${(margin * 100).toStringAsFixed(0)}%',
+                                    dimmed: margin < 0.2,
                                   ),
-                                  Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      const Text('COGS', style: TextStyle(color: Colors.grey, fontSize: 11)),
-                                      const SizedBox(height: 2),
-                                      Text(
-                                        'PKR ${cogs.toStringAsFixed(0)}',
-                                        style: const TextStyle(color: Colors.white, fontSize: 14),
-                                      ),
-                                    ],
-                                  ),
-                                  Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      const Text('Margin', style: TextStyle(color: Colors.grey, fontSize: 11)),
-                                      const SizedBox(height: 2),
-                                      Text(
-                                        '${(marginPct * 100).toStringAsFixed(0)}%',
-                                        style: TextStyle(
-                                          color: marginPct < 0.2 ? Colors.redAccent : Colors.greenAccent,
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      const Text('Stock', style: TextStyle(color: Colors.grey, fontSize: 11)),
-                                      const SizedBox(height: 2),
-                                      Text(
-                                        stock.toString(),
-                                        style: TextStyle(
-                                          color: stockColor,
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                    ],
+                                  _Stat(
+                                    label: 'Stock',
+                                    value: stock.toString(),
+                                    dimmed: stock < 15,
                                   ),
                                 ],
                               ),
@@ -267,6 +161,32 @@ class _ProductsScreenState extends State<ProductsScreen> {
           ],
         ),
       ),
+    );
+  }
+}
+
+class _Stat extends StatelessWidget {
+  final String label;
+  final String value;
+  final bool dimmed;
+  const _Stat({required this.label, required this.value, this.dimmed = false});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label, style: const TextStyle(color: _textTertiary, fontSize: 10)),
+        const SizedBox(height: 3),
+        Text(
+          value,
+          style: TextStyle(
+            color: dimmed ? const Color(0xFFFF9999) : _textPrimary,
+            fontSize: 13,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+      ],
     );
   }
 }

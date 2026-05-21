@@ -45,7 +45,9 @@ def get_logs(plan_id: str):
     r = run.data
     resp = {"plan_id": plan_id, "status": r["status"]}
     if r.get("signals_json"):       resp["signals"]        = r["signals_json"]
-    if r.get("insight_json"):       resp["insight_report"]  = r["insight_json"]
+    if r.get("insight_json"):       
+        resp["insight_report"]  = r["insight_json"]
+        resp["insight"]         = r["insight_json"]
     if r.get("action_plan_json"):   resp["action_plan"]    = r["action_plan_json"]
     if r.get("execution_log_json"): resp["execution_log"]  = r["execution_log_json"]
     if r.get("report_json"):        resp["final_report"]   = r["report_json"]

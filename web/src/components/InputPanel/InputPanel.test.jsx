@@ -51,6 +51,6 @@ describe('InputPanel Module', () => {
     
     fireEvent.click(screen.getByText('Analyze Signals'));
     
-    expect(handleRunCustom).toHaveBeenCalledWith({ type: 'url', value: 'https://test.com' });
+    expect(handleRunCustom).toHaveBeenCalledWith([{ type: 'url', content: 'https://test.com' }]);
   });
 });

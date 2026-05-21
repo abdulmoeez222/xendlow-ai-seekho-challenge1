@@ -10,46 +10,52 @@ export function Sidebar({ currentTab, setCurrentTab }) {
   ];
 
   return (
-    <div className="w-64 bg-[#0F172A] border-r border-slate-800 h-screen sticky top-0 flex flex-col shrink-0">
+    <div className="w-64 bg-[#0A0A0A] border-r border-[#1F1F1F] h-screen sticky top-0 flex flex-col shrink-0">
       <div className="p-6">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-blue-600/20 rounded-xl flex items-center justify-center text-blue-500 border border-blue-500/30">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+          <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center text-[#0A0A0A]">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
             </svg>
           </div>
           <div>
-            <div className="text-white font-bold text-lg">Insight AI</div>
-            <div className="text-slate-400 text-xs font-medium">E-Commerce Copilot</div>
+            <div className="text-white font-semibold text-sm tracking-tight">Insight AI</div>
+            <div className="text-[#555555] text-xs font-semibold tracking-wider uppercase">Console</div>
           </div>
         </div>
       </div>
       
-      <div className="flex-1 px-4 py-2 space-y-1">
-        {tabs.map(tab => (
-          <button
-            key={tab.id}
-            onClick={() => setCurrentTab(tab.id)}
-            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
-              currentTab === tab.id 
-                ? 'bg-blue-600/15 text-blue-500 font-semibold' 
-                : 'text-slate-400 hover:bg-slate-800/50 hover:text-white'
-            }`}
-          >
-            <svg className="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={tab.icon} />
-            </svg>
-            {tab.label}
-          </button>
-        ))}
+      <div className="flex-1 px-3 py-2 space-y-0.5">
+        <div className="px-3 mb-2 text-[10px] font-bold text-[#555555] tracking-widest uppercase">
+          Navigation
+        </div>
+        {tabs.map(tab => {
+          const isSelected = currentTab === tab.id;
+          return (
+            <button
+              key={tab.id}
+              onClick={() => setCurrentTab(tab.id)}
+              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-xs ${
+                isSelected 
+                  ? 'bg-[#161616] text-white font-medium border border-[#222222]' 
+                  : 'text-[#8C8C8C] hover:bg-[#111111] hover:text-white border border-transparent'
+              }`}
+            >
+              <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={tab.icon} />
+              </svg>
+              {tab.label}
+            </button>
+          );
+        })}
       </div>
       
-      <div className="p-4 border-t border-slate-800">
+      <div className="p-4 border-t border-[#1F1F1F]">
         <button 
           onClick={() => window.location.reload()}
-          className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-slate-400 hover:bg-red-500/10 hover:text-red-400 transition-all"
+          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-[#8C8C8C] hover:bg-[#161616] hover:text-white transition-all text-xs border border-transparent hover:border-[#222222]"
         >
-          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
           </svg>
           Sign Out

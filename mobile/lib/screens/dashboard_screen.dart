@@ -2,6 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../widgets/app_drawer.dart';
 
+const _bg            = Color(0xFF0A0A0A);
+const _surface       = Color(0xFF111111);
+const _border        = Color(0xFF1F1F1F);
+const _borderSubtle  = Color(0xFF161616);
+const _textPrimary   = Color(0xFFFFFFFF);
+const _textSecondary = Color(0xFF8C8C8C);
+const _textTertiary  = Color(0xFF444444);
+
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
 
@@ -12,7 +20,7 @@ class DashboardScreen extends StatefulWidget {
 class _DashboardScreenState extends State<DashboardScreen> {
   final _supabase = Supabase.instance.client;
   bool _isLoading = true;
-  double _totalSpend = 850000.0; // Default mockup baseline
+  double _totalSpend = 850000.0;
   int _campaignsBelowThreshold = 1;
   int _activeCampaignsCount = 3;
 
@@ -24,279 +32,146 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   Future<void> _fetchDbMetrics() async {
     try {
-      final campaignsData = await _supabase.from('marketing_campaigns').select();
-      final list = campaignsData as List<dynamic>? ?? [];
-      double spendSum = 0;
-      int belowThreshold = 0;
-      int activeCount = 0;
+      final list = (await _supabase.from('marketing_campaigns').select()) as List<dynamic>? ?? [];
+      double spendSum = 0; int below = 0; int active = 0;
       for (var c in list) {
         if (c['active'] == true) {
-          spendSum += (c['spend'] ?? 0).toDouble();
-          activeCount++;
-          if ((c['roas'] ?? 0).toDouble() < 2.0) {
-            belowThreshold++;
-          }
+          spendSum += (c['spend'] ?? 0).toDouble(); active++;
+          if ((c['roas'] ?? 0).toDouble() < 2.0) below++;
         }
       }
       if (mounted) {
         setState(() {
-          // Add to baseline to keep realistic scale if needed, or use exact db values
-          // If we want exact screenshot scale:
           _totalSpend = spendSum > 0 ? spendSum : 850000.0;
-          _campaignsBelowThreshold = belowThreshold;
-          _activeCampaignsCount = activeCount;
+          _campaignsBelowThreshold = below;
+          _activeCampaignsCount = active;
           _isLoading = false;
         });
       }
-    } catch (e) {
-      if (mounted) {
-        setState(() => _isLoading = false);
-      }
+    } catch (_) {
+      if (mounted) setState(() => _isLoading = false);
     }
-  }
-
-  Widget _buildMetricCard({
-    required String title,
-    required String value,
-    required String change,
-    required bool isPositive,
-    required Color color,
-  }) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: const Color(0xFF1E293B),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withOpacity(0.05)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            title,
-            style: const TextStyle(color: Colors.grey, fontSize: 13, fontWeight: FontWeight.w500),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            value,
-            style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              Icon(
-                isPositive ? Icons.arrow_upward_rounded : Icons.arrow_downward_rounded,
-                color: isPositive ? Colors.greenAccent : Colors.redAccent,
-                size: 14,
-              ),
-              const SizedBox(width: 4),
-              Text(
-                change,
-                style: TextStyle(
-                  color: isPositive ? Colors.greenAccent : Colors.redAccent,
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildBar(String day, double heightPct, bool isHighlighted) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.end,
-      children: [
-        Container(
-          height: 120 * heightPct,
-          width: 18,
-          decoration: BoxDecoration(
-            color: isHighlighted ? const Color(0xFF3B82F6) : const Color(0xFF1E293B),
-            borderRadius: BorderRadius.circular(4),
-            border: isHighlighted ? null : Border.all(color: const Color(0xFF334155)),
-          ),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          day,
-          style: TextStyle(
-            color: isHighlighted ? Colors.white : Colors.grey,
-            fontSize: 11,
-            fontWeight: isHighlighted ? FontWeight.bold : FontWeight.normal,
-          ),
-        ),
-      ],
-    );
   }
 
   @override
   Widget build(BuildContext context) {
-    final formatSpend = _totalSpend >= 1000 ? '${(_totalSpend / 1000).toStringAsFixed(0)}K' : _totalSpend.toString();
-    
+    final spendStr = _totalSpend >= 1000
+        ? 'PKR ${(_totalSpend / 1000).toStringAsFixed(0)}K'
+        : 'PKR ${_totalSpend.toStringAsFixed(0)}';
+
     return Scaffold(
-      backgroundColor: const Color(0xFF0F172A),
+      backgroundColor: _bg,
       drawer: const AppDrawer(currentRoute: 'dashboard'),
-      appBar: AppBar(
-        title: const Text(
-          'Store Dashboard',
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-        ),
-        backgroundColor: const Color(0xFF0F172A),
-        elevation: 0,
-        iconTheme: const IconThemeData(color: Colors.white),
-        actions: [
-          Container(
-            margin: const EdgeInsets.only(right: 16),
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-            decoration: BoxDecoration(
-              color: const Color(0xFF1E293B),
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: const Color(0xFF334155)),
-            ),
-            child: const Row(
-              children: [
-                Icon(Icons.dark_mode_rounded, color: Colors.amber, size: 16),
-                SizedBox(width: 4),
-                Text(
-                  '15',
-                  style: TextStyle(
-                    color: Colors.amber,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 13,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
+      appBar: _appBar('Dashboard'),
       body: RefreshIndicator(
+        color: _textPrimary,
+        backgroundColor: _surface,
         onRefresh: _fetchDbMetrics,
         child: SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
-          padding: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.all(16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               if (_isLoading)
-                const LinearProgressIndicator(color: Color(0xFF2563EB), backgroundColor: Color(0xFF1E293B)),
-              
-              const Text(
-                'Overview metrics',
-                style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 12),
-              
-              // Grid of metrics
+                const LinearProgressIndicator(
+                  color: _textPrimary,
+                  backgroundColor: _borderSubtle,
+                  minHeight: 1,
+                ),
+              const SizedBox(height: 8),
+
+              // ── KPI grid ──────────────────────────────────────────────────
+              const _SectionLabel('KEY METRICS'),
+              const SizedBox(height: 10),
               GridView.count(
                 crossAxisCount: 2,
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
-                mainAxisSpacing: 12,
-                crossAxisSpacing: 12,
-                childAspectRatio: 1.3,
+                mainAxisSpacing: 8,
+                crossAxisSpacing: 8,
+                childAspectRatio: 1.45,
                 children: [
-                  _buildMetricCard(
-                    title: 'Revenue',
-                    value: 'PKR 2.4M',
-                    change: '+12.4%',
-                    isPositive: true,
-                    color: Colors.blue,
-                  ),
-                  _buildMetricCard(
-                    title: 'Ad Costs',
-                    value: 'PKR $formatSpend',
-                    change: '+8.2%',
-                    isPositive: true,
-                    color: Colors.purple,
-                  ),
-                  _buildMetricCard(
-                    title: 'Net Profit',
-                    value: 'PKR 1.2M',
-                    change: '+15.1%',
-                    isPositive: true,
-                    color: Colors.green,
-                  ),
-                  _buildMetricCard(
-                    title: 'Conversion Rate',
-                    value: '3.2%',
-                    change: '-0.4pp',
-                    isPositive: false,
-                    color: Colors.red,
-                  ),
+                  _MetricCard(label: 'Revenue', value: 'PKR 2.4M',  delta: '+12.4%', positive: true),
+                  _MetricCard(label: 'Ad Spend', value: spendStr,   delta: '+8.2%',  positive: false),
+                  _MetricCard(label: 'Net Profit', value: 'PKR 1.2M', delta: '+15.1%', positive: true),
+                  _MetricCard(label: 'Conversion', value: '3.2%',   delta: '-0.4pp', positive: false),
                 ],
               ),
               const SizedBox(height: 24),
-              
-              // Revenue chart card
+
+              // ── Revenue bar chart ──────────────────────────────────────────
+              const _SectionLabel('REVENUE — THIS WEEK'),
+              const SizedBox(height: 10),
               Container(
-                width: double.infinity,
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF1E293B).withOpacity(0.5),
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: Colors.white.withOpacity(0.05)),
+                  color: _surface,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: _border),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      'Revenue this week',
-                      style: TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.bold),
-                    ),
-                    const SizedBox(height: 4),
-                    const Text(
-                      'Last 30 days · May 2026',
-                      style: TextStyle(color: Colors.grey, fontSize: 12),
-                    ),
-                    const SizedBox(height: 24),
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      crossAxisAlignment: CrossAxisAlignment.end,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        _buildBar('M', 0.35, false),
-                        _buildBar('T', 0.48, false),
-                        _buildBar('W', 0.62, false),
-                        _buildBar('T', 0.55, false),
-                        _buildBar('F', 0.95, true), // Highlighted Friday
-                        _buildBar('S', 0.75, false),
-                        _buildBar('S', 0.40, false),
+                        const Text('May 2026', style: TextStyle(color: _textSecondary, fontSize: 13)),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                          decoration: BoxDecoration(
+                            color: _borderSubtle,
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: const Text('7d', style: TextStyle(color: _textSecondary, fontSize: 11)),
+                        ),
                       ],
+                    ),
+                    const SizedBox(height: 20),
+                    SizedBox(
+                      height: 100,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          _Bar('M', 0.35, false),
+                          _Bar('T', 0.48, false),
+                          _Bar('W', 0.62, false),
+                          _Bar('T', 0.55, false),
+                          _Bar('F', 0.95, true),
+                          _Bar('S', 0.75, false),
+                          _Bar('S', 0.40, false),
+                        ],
+                      ),
                     ),
                   ],
                 ),
               ),
-              const SizedBox(height: 24),
-              
-              // Alerts panel
+              const SizedBox(height: 16),
+
+              // ── Alert ──────────────────────────────────────────────────────
               if (_campaignsBelowThreshold > 0)
                 Container(
-                  padding: const EdgeInsets.all(16),
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF7F1D1D).withOpacity(0.2),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: const Color(0xFFB91C1C).withOpacity(0.4)),
+                    color: _surface,
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: _border),
                   ),
                   child: Row(
                     children: [
-                      const Icon(Icons.warning_amber_rounded, color: Colors.redAccent, size: 24),
-                      const SizedBox(width: 12),
+                      Container(
+                        width: 6, height: 6,
+                        decoration: const BoxDecoration(
+                          shape: BoxShape.circle, color: Color(0xFFFF4D4D),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
                       Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text(
-                              'ROAS Alert Warning',
-                              style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14),
-                            ),
-                            const SizedBox(height: 2),
-                            Text(
-                              '$_campaignsBelowThreshold campaign below 2.0x ROAS threshold. Retargeting campaign is burning budget.',
-                              style: const TextStyle(color: Colors.grey, fontSize: 12),
-                            ),
-                          ],
+                        child: Text(
+                          '$_campaignsBelowThreshold campaign below 2.0x ROAS — budget at risk',
+                          style: const TextStyle(color: _textSecondary, fontSize: 13),
                         ),
                       ),
                     ],
@@ -309,3 +184,124 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 }
+
+// ── Sub-widgets ───────────────────────────────────────────────────────────────
+
+class _MetricCard extends StatelessWidget {
+  final String label;
+  final String value;
+  final String delta;
+  final bool positive;
+
+  const _MetricCard({
+    required this.label,
+    required this.value,
+    required this.delta,
+    required this.positive,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: _surface,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: _border),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(label, style: const TextStyle(color: _textSecondary, fontSize: 12)),
+          Text(
+            value,
+            style: const TextStyle(
+              color: _textPrimary,
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
+              letterSpacing: -0.3,
+            ),
+          ),
+          Text(
+            delta,
+            style: TextStyle(
+              color: positive ? const Color(0xFF6EE7B7) : const Color(0xFFFF9999),
+              fontSize: 11,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _Bar extends StatelessWidget {
+  final String day;
+  final double pct;
+  final bool highlight;
+  const _Bar(this.day, this.pct, this.highlight);
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: [
+        Container(
+          width: 24,
+          height: 100 * pct,
+          decoration: BoxDecoration(
+            color: highlight ? _textPrimary : const Color(0xFF1E1E1E),
+            borderRadius: BorderRadius.circular(4),
+          ),
+        ),
+        const SizedBox(height: 6),
+        Text(
+          day,
+          style: TextStyle(
+            color: highlight ? _textPrimary : _textTertiary,
+            fontSize: 11,
+            fontWeight: highlight ? FontWeight.w600 : FontWeight.normal,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _SectionLabel extends StatelessWidget {
+  final String text;
+  const _SectionLabel(this.text);
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      text,
+      style: const TextStyle(
+        color: _textTertiary,
+        fontSize: 10,
+        fontWeight: FontWeight.w600,
+        letterSpacing: 0.8,
+      ),
+    );
+  }
+}
+
+AppBar _appBar(String title) => AppBar(
+  backgroundColor: _bg,
+  elevation: 0,
+  scrolledUnderElevation: 0,
+  iconTheme: const IconThemeData(color: _textPrimary),
+  centerTitle: false,
+  title: Text(
+    title,
+    style: const TextStyle(
+      color: _textPrimary, fontSize: 15, fontWeight: FontWeight.w600,
+    ),
+  ),
+  bottom: const PreferredSize(
+    preferredSize: Size.fromHeight(1),
+    child: Divider(height: 1, color: Color(0xFF1A1A1A)),
+  ),
+);

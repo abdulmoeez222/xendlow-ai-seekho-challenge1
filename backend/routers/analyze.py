@@ -184,7 +184,7 @@ CRITICAL CONSTRAINTS:
         raw = generate(initial_prompt, is_json=True, temperature=0.2)
         match = re.search(r'\{[\s\S]*\}', raw)
         initial_result = json.loads(match.group(0) if match else "{}")
-        print(f"[ANALYST] Initial analysis complete — severity={initial_result.get('severity_score')}")
+        print(f"[ANALYST] Initial analysis complete - severity={initial_result.get('severity_score')}")
     except Exception as e:
         print(f"[ANALYST] Initial analysis error: {e}")
         initial_result = {
@@ -237,8 +237,8 @@ Return the IMPROVED analysis as JSON only, no markdown fences:
         raw2 = generate(reflection_prompt, is_json=True, temperature=0.1)
         match2 = re.search(r'\{[\s\S]*\}', raw2)
         refined_result = json.loads(match2.group(0) if match2 else "{}")
-        print(f"[ANALYST] Reflection complete — "
-              f"severity {initial_result.get('severity_score')} → {refined_result.get('severity_score')} | "
+        print(f"[ANALYST] Reflection complete - "
+              f"severity {initial_result.get('severity_score')} -> {refined_result.get('severity_score')} | "
               f"reflection: {refined_result.get('reflection_notes', 'none')[:80]}")
     except Exception as e:
         print(f"[ANALYST] Reflection error (keeping initial): {e}")
@@ -265,7 +265,7 @@ Return the IMPROVED analysis as JSON only, no markdown fences:
         .data[0]
     )
 
-    print(f"[ANALYST] ✅ Final insight stored — id={row['id']}, severity={final['severity_score']}, confidence={final['confidence']}")
+    print(f"[ANALYST] [SUCCESS] Final insight stored - id={row['id']}, severity={final['severity_score']}, confidence={final['confidence']}")
     return row
 
 

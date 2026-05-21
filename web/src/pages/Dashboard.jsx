@@ -65,7 +65,7 @@ export function Dashboard() {
   };
 
   return (
-    <div className="flex h-screen bg-[#0F172A] overflow-hidden">
+    <div className="flex h-screen bg-[#0A0A0A] overflow-hidden">
       <Sidebar currentTab={currentTab} setCurrentTab={setCurrentTab} />
       
       {/* Main Content Area */}

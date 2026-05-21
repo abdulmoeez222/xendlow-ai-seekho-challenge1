@@ -31,7 +31,16 @@ async def run_scenario(scenario_id: int, background_tasks: BackgroundTasks):
     # 2. Generate tracking ID for UI Stepper
     run_id = str(uuid.uuid4())
 
-    # 3. Run the pipeline via the 5-Agent Orchestrator (Phase 1) in the background
+    # 3. Pre-seed the pipeline_runs row BEFORE starting the background task.
+    #    This ensures that the mobile app's /logs/{plan_id} polling immediately
+    #    receives status="running" instead of "not_found", preventing the UI from
+    #    appearing permanently stuck on the Ingestor step.
+    db.table("pipeline_runs").insert({
+        "plan_id": run_id,
+        "status": "running",
+    }).execute()
+
+    # 4. Run the pipeline via the 5-Agent Orchestrator (Phase 1) in the background
     engine = InsightEngine(scenario, run_id)
     background_tasks.add_task(engine.run_phase1)
 
@@ -40,6 +49,7 @@ async def run_scenario(scenario_id: int, background_tasks: BackgroundTasks):
 
 @router.post("/run-custom")
 async def run_custom(body: dict, background_tasks: BackgroundTasks):
+    db = get_supabase()
     run_id = str(uuid.uuid4())
     scenario = {
         "id": 999,
@@ -47,7 +57,13 @@ async def run_custom(body: dict, background_tasks: BackgroundTasks):
         "description": "User-provided custom signals.",
         "input_signals": body.get("signals", [])
     }
-    
+
+    # Pre-seed the pipeline_runs row so polling returns status="running" immediately
+    db.table("pipeline_runs").insert({
+        "plan_id": run_id,
+        "status": "running",
+    }).execute()
+
     engine = InsightEngine(scenario, run_id)
     background_tasks.add_task(engine.run_phase1)
 

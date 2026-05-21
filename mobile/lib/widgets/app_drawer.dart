@@ -7,9 +7,15 @@ import '../screens/sales_screen.dart';
 import '../screens/ads_screen.dart';
 import '../screens/login_screen.dart';
 
+const _bg            = Color(0xFF0A0A0A);
+const _surface       = Color(0xFF111111);
+const _border        = Color(0xFF1F1F1F);
+const _textPrimary   = Color(0xFFFFFFFF);
+const _textSecondary = Color(0xFF8C8C8C);
+const _textTertiary  = Color(0xFF444444);
+
 class AppDrawer extends StatelessWidget {
   final String currentRoute;
-
   const AppDrawer({super.key, required this.currentRoute});
 
   Future<void> _logout(BuildContext context) async {
@@ -24,195 +30,157 @@ class AppDrawer extends StatelessWidget {
     }
   }
 
-  Widget _buildDrawerItem({
-    required IconData icon,
-    required String title,
-    required String route,
-    required VoidCallback onTap,
-  }) {
-    final isSelected = currentRoute == route;
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-      decoration: BoxDecoration(
-        color: isSelected ? const Color(0xFF2563EB).withOpacity(0.15) : Colors.transparent,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: ListTile(
-        leading: Icon(
-          icon,
-          color: isSelected ? const Color(0xFF2563EB) : Colors.grey[400],
-        ),
-        title: Text(
-          title,
-          style: TextStyle(
-            color: isSelected ? const Color(0xFF2563EB) : Colors.white,
-            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-            fontSize: 15,
-          ),
-        ),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        onTap: onTap,
-      ),
-    );
+  void _navigate(BuildContext context, String route) {
+    Navigator.pop(context);
+    Widget screen;
+    switch (route) {
+      case 'chat':      screen = const HomeScreen(); break;
+      case 'dashboard': screen = const DashboardScreen(); break;
+      case 'products':  screen = const ProductsScreen(); break;
+      case 'sales':     screen = const SalesScreen(); break;
+      case 'ads':       screen = const AdsScreen(); break;
+      default: return;
+    }
+    if (currentRoute == route) return;
+    Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => screen));
   }
 
   @override
   Widget build(BuildContext context) {
     return Drawer(
-      backgroundColor: const Color(0xFF0F172A), // Dark slate
+      backgroundColor: _bg,
+      width: 260,
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          DrawerHeader(
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                colors: [Color(0xFF1E293B), Color(0xFF0F172A)],
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-              ),
-              border: Border(
-                bottom: BorderSide(color: Color(0xFF334155), width: 1),
-              ),
-            ),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
+          // Header
+          const SizedBox(height: 56),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: Row(
               children: [
-                Row(
+                Container(
+                  width: 32, height: 32,
+                  decoration: BoxDecoration(
+                    color: _textPrimary,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Icon(Icons.bolt, color: _bg, size: 18),
+                ),
+                const SizedBox(width: 10),
+                const Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF2563EB).withOpacity(0.2),
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: const Color(0xFF2563EB), width: 1.5),
-                      ),
-                      child: const Icon(
-                        Icons.rocket_launch_rounded,
-                        color: Color(0xFF3B82F6),
-                        size: 28,
+                    Text(
+                      'Insight AI',
+                      style: TextStyle(
+                        color: _textPrimary,
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
-                    const SizedBox(width: 12),
-                    const Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Insight AI',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        Text(
-                          'E-Commerce Copilot',
-                          style: TextStyle(
-                            color: Colors.grey,
-                            fontSize: 12,
-                          ),
-                        ),
-                      ],
+                    Text(
+                      'E-Commerce Copilot',
+                      style: TextStyle(color: _textTertiary, fontSize: 11),
                     ),
                   ],
                 ),
               ],
             ),
           ),
-          const SizedBox(height: 12),
-          Expanded(
-            child: ListView(
-              padding: EdgeInsets.zero,
-              children: [
-                _buildDrawerItem(
-                  icon: Icons.chat_bubble_outline_rounded,
-                  title: 'AI Chat Console',
-                  route: 'chat',
-                  onTap: () {
-                    if (currentRoute != 'chat') {
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(builder: (context) => const HomeScreen()),
-                      );
-                    } else {
-                      Navigator.pop(context);
-                    }
-                  },
-                ),
-                _buildDrawerItem(
-                  icon: Icons.dashboard_outlined,
-                  title: 'Store Dashboard',
-                  route: 'dashboard',
-                  onTap: () {
-                    if (currentRoute != 'dashboard') {
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(builder: (context) => const DashboardScreen()),
-                      );
-                    } else {
-                      Navigator.pop(context);
-                    }
-                  },
-                ),
-                _buildDrawerItem(
-                  icon: Icons.inventory_2_outlined,
-                  title: 'Product Catalog',
-                  route: 'products',
-                  onTap: () {
-                    if (currentRoute != 'products') {
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(builder: (context) => const ProductsScreen()),
-                      );
-                    } else {
-                      Navigator.pop(context);
-                    }
-                  },
-                ),
-                _buildDrawerItem(
-                  icon: Icons.receipt_long_outlined,
-                  title: 'Sales & Order Log',
-                  route: 'sales',
-                  onTap: () {
-                    if (currentRoute != 'sales') {
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(builder: (context) => const SalesScreen()),
-                      );
-                    } else {
-                      Navigator.pop(context);
-                    }
-                  },
-                ),
-                _buildDrawerItem(
-                  icon: Icons.campaign_outlined,
-                  title: 'Ads Campaign Manager',
-                  route: 'ads',
-                  onTap: () {
-                    if (currentRoute != 'ads') {
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(builder: (context) => const AdsScreen()),
-                      );
-                    } else {
-                      Navigator.pop(context);
-                    }
-                  },
-                ),
-              ],
-            ),
-          ),
-          const Divider(color: Color(0xFF334155)),
+          const SizedBox(height: 28),
+
+          // Section label
           Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8.0),
-            child: _buildDrawerItem(
-              icon: Icons.logout_rounded,
-              title: 'Sign Out',
-              route: 'logout',
-              onTap: () => _logout(context),
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
+            child: Text(
+              'NAVIGATION',
+              style: TextStyle(
+                color: _textTertiary,
+                fontSize: 10,
+                fontWeight: FontWeight.w600,
+                letterSpacing: 0.8,
+              ),
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 4),
+
+          _NavItem(label: 'Chat Console',     icon: Icons.chat_bubble_outline,  route: 'chat',      current: currentRoute, onTap: () => _navigate(context, 'chat')),
+          _NavItem(label: 'Store Dashboard',  icon: Icons.grid_view_outlined,   route: 'dashboard', current: currentRoute, onTap: () => _navigate(context, 'dashboard')),
+          _NavItem(label: 'Product Catalog',  icon: Icons.inventory_2_outlined, route: 'products',  current: currentRoute, onTap: () => _navigate(context, 'products')),
+          _NavItem(label: 'Sales & Orders',   icon: Icons.receipt_long_outlined, route: 'sales',    current: currentRoute, onTap: () => _navigate(context, 'sales')),
+          _NavItem(label: 'Ad Campaigns',     icon: Icons.campaign_outlined,    route: 'ads',       current: currentRoute, onTap: () => _navigate(context, 'ads')),
+
+          const Spacer(),
+          Container(height: 1, color: const Color(0xFF1A1A1A)),
+          const SizedBox(height: 4),
+          _NavItem(
+            label: 'Sign Out',
+            icon: Icons.logout_rounded,
+            route: 'logout',
+            current: currentRoute,
+            onTap: () => _logout(context),
+            isDestructive: true,
+          ),
+          const SizedBox(height: 20),
         ],
+      ),
+    );
+  }
+}
+
+class _NavItem extends StatelessWidget {
+  final String label;
+  final IconData icon;
+  final String route;
+  final String current;
+  final VoidCallback onTap;
+  final bool isDestructive;
+
+  const _NavItem({
+    required this.label,
+    required this.icon,
+    required this.route,
+    required this.current,
+    required this.onTap,
+    this.isDestructive = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final bool isSelected = current == route;
+    final Color textColor = isDestructive
+        ? _textSecondary
+        : isSelected
+            ? _textPrimary
+            : _textSecondary;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 1),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(8),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 9),
+          decoration: BoxDecoration(
+            color: isSelected ? const Color(0xFF161616) : Colors.transparent,
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Row(
+            children: [
+              Icon(icon, color: textColor, size: 16),
+              const SizedBox(width: 10),
+              Text(
+                label,
+                style: TextStyle(
+                  color: textColor,
+                  fontSize: 13,
+                  fontWeight: isSelected ? FontWeight.w500 : FontWeight.normal,
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

@@ -35,7 +35,7 @@ describe('API Library', () => {
     expect(result).toEqual({ success: true, planId: '123' })
   })
 
-  it('runCustom calls /ingest with POST and body', async () => {
+  it('runCustom calls /run-custom with POST and body', async () => {
     global.fetch.mockResolvedValueOnce({
       json: () => Promise.resolve({ success: true })
     })
@@ -44,11 +44,11 @@ describe('API Library', () => {
     const result = await api.runCustom(signals)
     
     expect(global.fetch).toHaveBeenCalledWith(
-      expect.stringContaining('/ingest'),
+      expect.stringContaining('/run-custom'),
       expect.objectContaining({ 
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(signals)
+        body: JSON.stringify({ signals })
       })
     )
     expect(result).toEqual({ success: true })

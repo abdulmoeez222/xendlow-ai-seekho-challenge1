@@ -51,54 +51,32 @@ def build_report_object(insight: dict, plan: dict, execution_log: dict, elapsed_
     # ── LLM Executive Summary Generation ──
     try:
         report_prompt = f"""
-You are the Lead E-Commerce Operations Auditor & Reporter at InsightAI.
-Generate a concise, professional, and well-structured Executive Summary of the recent pipeline execution for the store owner.
+You are the Lead E-Commerce Operations Auditor at InsightAI.
+Write a short, punchy 2-3 sentence summary of exactly what the autonomous Executor agent just did.
 
 INPUT ARTIFACTS:
-1. Primary Insight: {insight.get("primary_insight", "N/A")}
-2. Action Taken: {plan.get("selected_action", "N/A")}
-3. Execution Details:
-   - Modified Products: {execution_log.get("agent_trace", {}).get("modified_products", [])}
-   - Modified Campaigns: {execution_log.get("agent_trace", {}).get("modified_campaigns", [])}
-   - Before Snapshot: {execution_log.get("before_snapshot", {})}
-   - After Snapshot: {execution_log.get("after_snapshot", {})}
-   - Validation Warnings: {execution_log.get("agent_trace", {}).get("validation_warnings", [])}
-   - Clamped due to COGS limit: {execution_log.get("agent_trace", {}).get("clamped", False)}
-4. Historical Run Performance Trends:
-{trends_str}
-5. Elapsed Time: {elapsed_ms}ms
+- Action Taken: {plan.get("selected_action", "N/A")}
+- Modified Products: {execution_log.get("agent_trace", {}).get("modified_products", [])}
+- Modified Campaigns: {execution_log.get("agent_trace", {}).get("modified_campaigns", [])}
+- Projected Revenue Recovery: {recovery_str}
+- Validation Warnings (e.g., price clamped to COGS): {execution_log.get("agent_trace", {}).get("validation_warnings", [])}
 
-INSTRUCTIONS:
-Write a beautifully formatted Markdown report containing the following exact sections:
-### 1. Operations Overview
-Summarize the initial signal/insight, the strategy executed, and the overall system status post-execution in 2 sentences.
-
-### 2. Live Store Impact
-List exact changes applied to Shopify Products (SKU, before price, after price, before/after margins) and Marketing Campaigns (active status, ROAS, budget changes) in a bulleted or tabular format based on the snapshots. If a price was clamped to protect the COGS safety margin, mention this explicitly as a safety highlight.
-
-### 3. Trend Comparison & Performance Benchmarking
-Analyze how this run's efficiency compares to previous runs based on the provided historical trends (e.g. higher recovery value, margin trade-offs).
-
-### 4. Revenue Recovery & Strategic Outlook
-Explain the projected revenue recovery of {recovery_str} and provide a 2-sentence forward-looking recommendation to sustain operational efficiency.
-
-Keep the tone expert, analytical, and direct. Do not include introductory text or markdown fences (```markdown). Start directly with the section headings.
+RULES:
+- Focus ONLY on what was actually changed in the database (products priced, campaigns paused).
+- Include the projected recovery amount.
+- Do NOT use markdown headers or sections. Keep it to a single short paragraph.
 """
         exec_summary_md = generate(report_prompt).strip()
     except Exception as gemini_err:
         print(f"[REPORTER] Error calling Gemini: {gemini_err}")
-        # Robust fallback report
-        exec_summary_md = f"""### 1. Operations Overview
-The pipeline executed successfully in response to: {insight.get('primary_insight', 'N/A')}. The strategy taken was: {plan.get('selected_action', 'N/A')}.
-
-### 2. Live Store Impact
-- Products updated: {execution_log.get('agent_trace', {}).get('modified_products', 'None')}
-- Campaigns updated: {execution_log.get('agent_trace', {}).get('modified_campaigns', 'None')}
-
-### 3. Revenue Recovery & Strategic Outlook
-- Projected revenue recovery is estimated at {recovery_str}.
-- Operational recommendation: Monitor SKU pricing margins weekly and optimize ad spend allocations.
-"""
+        # Robust fallback report focused on actual executor actions
+        prods = execution_log.get('agent_trace', {}).get('modified_products', [])
+        camps = execution_log.get('agent_trace', {}).get('modified_campaigns', [])
+        
+        prod_str = f"Updated pricing for {', '.join(prods)}." if prods else "No product prices changed."
+        camp_str = f"Modified campaigns: {', '.join(camps)}." if camps else "No campaigns modified."
+        
+        exec_summary_md = f"Execution complete: {plan.get('selected_action', 'Action taken')}. {prod_str} {camp_str} The projected revenue recovery for this adjustment is {recovery_str}."
 
     return {
         "insight":                    insight.get("primary_insight", ""),
@@ -113,7 +91,8 @@ The pipeline executed successfully in response to: {insight.get('primary_insight
         "before_state":               execution_log.get("before_snapshot", {}),
         "after_state":                execution_log.get("after_snapshot", {}),
         "actions_detail":             execution_log.get("actions_taken", []),
-        "executive_summary_markdown": exec_summary_md
+        "summary_report":             exec_summary_md,
+        "executive_summary_markdown": exec_summary_md  # Kept for backward compatibility
     }
 
 

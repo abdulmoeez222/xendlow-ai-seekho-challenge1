@@ -36,7 +36,11 @@ describe('TracePanel Module', () => {
   });
 
   it('expands on click and renders syntax highlighted logs', () => {
-    usePipelineStore.setState({ executionLog: mockExecutionLog });
+    usePipelineStore.setState({
+      signals: mockExecutionLog.ingestor_log,
+      insightReport: mockExecutionLog.analyst_log,
+      actionPlan: mockExecutionLog.planner_log,
+    });
     render(<TracePanel />);
     
     // Initially hidden (Framer motion removes it from DOM or zero height)
